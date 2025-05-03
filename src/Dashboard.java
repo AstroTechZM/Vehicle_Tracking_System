@@ -65,7 +65,7 @@ class DashboardImplementation extends JFrame {
         logoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Load the logo image (make sure the file path is correct)
-        ImageIcon originalIcon = new ImageIcon("MULogo.jpeg"); // Or "resources/logo.png" if in a folder
+        ImageIcon originalIcon = new ImageIcon("../lib/MULogo.jpeg"); // Or "resources/logo.png" if in a folder
         Image image = originalIcon.getImage().getScaledInstance(100,100,Image.SCALE_SMOOTH);
         ImageIcon resizedIcon = new ImageIcon(image);
         JLabel logoLabel = new JLabel(resizedIcon, SwingConstants.CENTER);
