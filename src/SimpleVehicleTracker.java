@@ -48,7 +48,7 @@ class LoginWindow extends JFrame {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         
         
-        ImageIcon icon = new ImageIcon("icon.jpeg");
+        ImageIcon icon = new ImageIcon("../lib/icon.jpeg");
         
 		Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
 		JLabel iconLabel = new JLabel(new ImageIcon(img));
