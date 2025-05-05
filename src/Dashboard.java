@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import javax.swing.border.AbstractBorder;
 import javax.swing.border.LineBorder;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
@@ -266,61 +265,6 @@ public class Dashboard extends JFrame {
         bottom.add(ViewLogs, BorderLayout.WEST);
 		return bottom;
 
-    }
-}
-
-
-
-
-class RoundedButton extends JButton {
-    private int radius;
-
-
-    public RoundedButton(String text, int radius,Color baseColor, Color hoverColor) {
-		super(text);
-		// Hover effects
-		this.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				setBackground(hoverColor);
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				setBackground(baseColor);
-			}
-		});
-        this.radius = radius;
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setBorderPainted(false);
-        
-        setForeground(Color.WHITE);
-        setBackground(baseColor);
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Fill background
-        g2.setColor(getBackground());
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
-
-        // Draw text
-        super.paintComponent(g);
-        g2.dispose();
-    }
-
-    @Override
-    protected void paintBorder(Graphics g) {
-        // Optional: draw custom border if needed
-    }
-
-    @Override
-    public boolean contains(int x, int y) {
-        Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius);
-        return shape.contains(x, y);
     }
 }
 

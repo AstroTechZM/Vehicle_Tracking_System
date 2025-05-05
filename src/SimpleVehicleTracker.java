@@ -24,11 +24,8 @@ public class SimpleVehicleTracker {
         // Use SwingUtilities.invokeLater to ensure thread safety
         SwingUtilities.invokeLater(() -> {
             // Create and show the login window
-            
             LoginWindow loginWindow = new LoginWindow();
-            
             loginWindow.setVisible(true);
-            //Dashboard.setVisible(true);
         });
     }
 }
@@ -132,13 +129,10 @@ class LoginWindow extends JFrame {
         panel.add(passwordField);
         
         //buttons
-        JButton loginBtn = new JButton("Login");
+        RoundedButton loginBtn = new RoundedButton("Login",20,new Color(59, 89, 182),new Color(75, 105, 200));
         loginBtn.addActionListener(this::performLogin);
         
-        JButton registerBtn = new JButton("Register");
-        // Style buttons
-        styleButton(loginBtn, new Color(59, 89, 182), new Color(75, 105, 200), 20);
-        styleButton(registerBtn, new Color(200, 50, 50), new Color(220, 70, 70), 15);
+        RoundedButton registerBtn = new RoundedButton("Register",20,new Color(200, 50, 50), new Color(220, 70, 70));
 
 				
         panel.add(loginBtn);
@@ -147,28 +141,7 @@ class LoginWindow extends JFrame {
         mainPanel.add(panel, BorderLayout.CENTER);
         add(mainPanel);
     }
-    public static void styleButton(JButton button, Color baseColor, Color hoverColor, int borderRadius) {
-		// Basic styling
-		button.setFont(new Font("Arial", Font.BOLD, 14));
-		button.setForeground(Color.WHITE);
-		button.setBackground(baseColor);
-		button.setFocusPainted(false);
-		button.setContentAreaFilled(false);
-		button.setOpaque(true);
-		button.setBorder(new RoundedBorder(borderRadius));
 
-		// Hover effects
-		button.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				button.setBackground(hoverColor);
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				button.setBackground(baseColor);
-			}
-		});
-	}
     
     private void performLogin(ActionEvent e) {
         String username = usernameField.getText().trim();
@@ -206,24 +179,4 @@ class LoginWindow extends JFrame {
 * 
 * 
 ********************************************************************************/
-class RoundedBorder extends AbstractBorder {
-    private int radius;
 
-    public RoundedBorder(int radius) {
-        this.radius = radius;
-    }
-
-    @Override
-    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(c.getForeground());
-        g2.drawRoundRect(x, y, width-1, height-1, radius, radius);
-        g2.dispose();
-    }
-
-    @Override
-    public Insets getBorderInsets(Component c) {
-        return new Insets(radius+1, radius+1, radius+1, radius+1);
-    }
-}
