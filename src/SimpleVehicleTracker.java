@@ -1,3 +1,5 @@
+
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -22,13 +24,17 @@ public class SimpleVehicleTracker {
         // Use SwingUtilities.invokeLater to ensure thread safety
         SwingUtilities.invokeLater(() -> {
             // Create and show the login window
+            
             LoginWindow loginWindow = new LoginWindow();
+            
             loginWindow.setVisible(true);
+            //Dashboard.setVisible(true);
         });
     }
 }
 
 class LoginWindow extends JFrame {
+	Dashboard Dashboard1 = new Dashboard();
     private JTextField usernameField;
     private JPasswordField passwordField;
 
@@ -171,12 +177,12 @@ class LoginWindow extends JFrame {
         // Simple authentication (in real app, use database)
         if (username.equals("admin") && password.equals("admin123")) {
             SwingUtilities.invokeLater(() -> {
-                new DashboardWindow("Admin").setVisible(true);
+                Dashboard1.setVisible(true);
                 this.dispose();
             });
         } else if (username.equals("guard") && password.equals("guard123")) {
             SwingUtilities.invokeLater(() -> {
-                new DashboardWindow("Guard").setVisible(true);
+                Dashboard1.setVisible(true);
                 this.dispose();
             });
         } else {
@@ -185,107 +191,6 @@ class LoginWindow extends JFrame {
                 "Login Error", 
                 JOptionPane.ERROR_MESSAGE);
         }
-    }
-}
-
-class DashboardWindow extends JFrame {
-    private final DefaultTableModel tableModel;
-    
-    public DashboardWindow(String role) {
-        setTitle("MU Vehicle Tracker - " + role);
-        setSize(800, 400);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        
-        // Create table with sample data
-        String[] columns = {"Plate Number", "Owner", "Entry Time", "Status"};
-        tableModel = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Make all cells non-editable
-                return false;
-            }
-        };
-        JTable table = new JTable(tableModel);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
-        // Add sample data
-        tableModel.addRow(new Object[]{"MU 1234", "John Doe", "10:00 AM", "Parked"});
-        tableModel.addRow(new Object[]{"MU 5678", "Jane Smith", "Yesterday", "Parked"});
-        
-        // Add components to window
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
-        
-        // Add buttons based on role
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        if (!role.equals("Viewer")) {
-            JButton addBtn = new JButton("Add Vehicle");
-            addBtn.addActionListener(e -> addVehicle());
-            buttonPanel.add(addBtn);
-            
-            JButton checkoutBtn = new JButton("Check Out");
-            checkoutBtn.addActionListener(e -> checkOutVehicle(table));
-            buttonPanel.add(checkoutBtn);
-        }
-        
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-        add(panel);
-    }
-    
-    private void addVehicle() {
-        JTextField plateField = new JTextField();
-        JTextField ownerField = new JTextField();
-        
-        Object[] fields = {
-            "License Plate (MU format, e.g., MU 1234 or MU 123A):", plateField,
-            "Owner Name:", ownerField
-        };
-        
-        int option = JOptionPane.showConfirmDialog(
-            this, fields, "Add Vehicle", JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.PLAIN_MESSAGE);
-            
-        if (option == JOptionPane.OK_OPTION) {
-            String plate = plateField.getText().trim().toUpperCase();
-            String owner = ownerField.getText().trim();
-            
-            if (!plate.matches("MU\\s\\d{3,4}[A-Z]?")) {
-                JOptionPane.showMessageDialog(this, 
-                    "Invalid plate format. Use MU 1234 or MU 123A format",
-                    "Input Error", 
-                    JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            if (owner.isEmpty()) {
-                JOptionPane.showMessageDialog(this, 
-                    "Owner name cannot be empty",
-                    "Input Error", 
-                    JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            tableModel.addRow(new Object[]{plate, owner, new java.util.Date(), "Parked"});
-        }
-    }
-    
-    private void checkOutVehicle(JTable table) {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, 
-                "Please select a vehicle first", 
-                "No Selection", 
-                JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        
-        tableModel.setValueAt("Checked Out", selectedRow, 3);
-        tableModel.setValueAt(new java.util.Date(), selectedRow, 2);
-        JOptionPane.showMessageDialog(this, 
-            "Vehicle checked out successfully", 
-            "Success", 
-            JOptionPane.INFORMATION_MESSAGE);
     }
 }
 /********************************************************************************

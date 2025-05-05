@@ -1,3 +1,5 @@
+
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -8,13 +10,9 @@ import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.table.*;
 
-public class Dashboard {
-    public static void main(String[] args) {
-        new DashboardImplementation();
-    }
-}
 
-class DashboardImplementation extends JFrame {
+
+public class Dashboard extends JFrame {
     private JLabel registerVehicle;
     private JLabel licencePlate, ownerName, permitType;
     private JTextField licencePlateTextField, ownerNameTextField;
@@ -22,7 +20,7 @@ class DashboardImplementation extends JFrame {
     private JComboBox permitTypeComboBox;
     private JButton ExportCSV, ExportPDF , ViewLogs;
     
-    public DashboardImplementation() {
+    public Dashboard() {
         setLayout(new BorderLayout());
         add(topPanel(),BorderLayout.NORTH);
         add(center(),BorderLayout.CENTER);
@@ -30,24 +28,10 @@ class DashboardImplementation extends JFrame {
         pack();
         setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
         
     }
 
-    private JPanel bottom()
-    {
-        JPanel bottom = new JPanel(new BorderLayout());
 
-        ExportCSV = new JButton("Export Logs to CSV");
-        ExportPDF = new JButton("Export Logs to PDF");
-        ViewLogs = new JButton("View System Logs");
-
-        bottom.add(ExportCSV,BorderLayout.EAST);
-        bottom.add(ExportPDF, BorderLayout.CENTER);
-        bottom.add(ViewLogs, BorderLayout.WEST);
-		return bottom;
-
-    }
 
 	private JPanel topPanel()
 	{
@@ -171,14 +155,14 @@ class DashboardImplementation extends JFrame {
         
         return panel;
     }
-    String[] columns = new String[]{"Entry ID", "License Plate", "Owner Name", "Check-In Time", "Check-Out","Status"};
-    Object[][] data = {
-                {"KAB123A", "BAD238","John Doe", "12:00 PM","true", "Checked Out"},
-                {"KCD456B", "BAD558","Jane Smith", "9:30 AM", "false", "Checked In"},
-            };
 
     private JScrollPane ShortCheckInOut()
     {
+		String[] columns = new String[]{"Entry ID", "License Plate", "Owner Name", "Check-In Time", "Check-Out","Status"};
+		Object[][] data = {
+                {"KAB123A", "BAD238","John Doe", "12:00 PM","true", "Checked Out"},
+                {"KCD456B", "BAD558","Jane Smith", "9:30 AM", "false", "Checked In"},
+        };
 		JTable tabel = new JTable(data, columns);
 		tabel.setOpaque(false);
 		styleTable(tabel);
@@ -186,7 +170,8 @@ class DashboardImplementation extends JFrame {
 		scrollPane.setOpaque(false);
 		return scrollPane;
       }
-      private static void styleTable(JTable table) {
+    private static void styleTable(JTable table)
+    {
         // Font and Row Height
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setRowHeight(28);
@@ -220,7 +205,8 @@ class DashboardImplementation extends JFrame {
         table.setShowHorizontalLines(true);
         table.setShowVerticalLines(false);
 	}
-      private JPanel regVehicleUI() {
+    private JPanel regVehicleUI()
+    {
 
 		RoundedPanel registrationUI = new RoundedPanel(50);
         JLabel registerVehicleLabel = new JLabel("Register Vehicle");
@@ -267,12 +253,26 @@ class DashboardImplementation extends JFrame {
         return registrationUI;
         
     }
+    private JPanel bottom()
+    {
+        JPanel bottom = new JPanel(new BorderLayout());
+
+        ExportCSV = new JButton("Export Logs to CSV");
+        ExportPDF = new JButton("Export Logs to PDF");
+        ViewLogs = new JButton("View System Logs");
+
+        bottom.add(ExportCSV,BorderLayout.EAST);
+        bottom.add(ExportPDF, BorderLayout.CENTER);
+        bottom.add(ViewLogs, BorderLayout.WEST);
+		return bottom;
+
+    }
 }
 
 
 
 
-public class RoundedButton extends JButton {
+class RoundedButton extends JButton {
     private int radius;
 
 
