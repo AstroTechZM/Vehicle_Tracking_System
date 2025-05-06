@@ -1,5 +1,3 @@
-
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -8,8 +6,6 @@ import javax.swing.border.LineBorder;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.table.*;
-
-
 
 public class Dashboard extends JFrame {
     private JLabel registerVehicle;

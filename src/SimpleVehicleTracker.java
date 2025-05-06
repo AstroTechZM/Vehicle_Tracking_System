@@ -31,7 +31,7 @@ public class SimpleVehicleTracker {
 }
 
 class LoginWindow extends JFrame {
-	Dashboard Dashboard1 = new Dashboard();
+	Dashboard dashboard = new Dashboard();
     private JTextField usernameField;
     private JPasswordField passwordField;
 
@@ -150,12 +150,12 @@ class LoginWindow extends JFrame {
         // Simple authentication (in real app, use database)
         if (username.equals("admin") && password.equals("admin123")) {
             SwingUtilities.invokeLater(() -> {
-                Dashboard1.setVisible(true);
+                dashboard.setVisible(true);
                 this.dispose();
             });
         } else if (username.equals("guard") && password.equals("guard123")) {
             SwingUtilities.invokeLater(() -> {
-                Dashboard1.setVisible(true);
+                dashboard.setVisible(true);
                 this.dispose();
             });
         } else {
