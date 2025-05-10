@@ -45,7 +45,7 @@ public class Dashboard extends JFrame {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setOpaque(false);
 		panel.add(sideBar(),BorderLayout.WEST);
-		panel.add(topPanel(),BorderLayout.CENTER);
+		//panel.add(topPanel(),BorderLayout.CENTER);
 		return panel;
 	}
 	private JPanel sideBar()
