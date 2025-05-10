@@ -87,7 +87,6 @@ public class RegistrationForm {
         gbc.gridy = 1;
         mainPanel.add(formPanel, gbc);
         
-        
 
         frame.add(mainPanel);
         frame.setVisible(true);

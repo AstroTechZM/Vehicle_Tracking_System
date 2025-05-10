@@ -6,6 +6,11 @@ import javax.swing.border.LineBorder;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.table.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
 public class Dashboard extends JFrame {
     private JLabel registerVehicle;
@@ -16,57 +21,115 @@ public class Dashboard extends JFrame {
     private JButton ExportCSV, ExportPDF , ViewLogs;
     
     public Dashboard() {
-        setLayout(new BorderLayout());
-        add(topPanel(),BorderLayout.NORTH);
-        add(center(),BorderLayout.CENTER);
-        add(bottom(), BorderLayout.SOUTH);
+		JPanel mainPanel = new JPanel();
+		setContentPane(mainPanel);
+        mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
+        add(topMostPanel());
+        //add(center(),BorderLayout.CENTER);
+        //add(bottom(), BorderLayout.SOUTH);
         pack();
         setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
     }
+	private JPanel topMostPanel()
+	{
+		JPanel topMost = new JPanel(new BorderLayout());
+		topMost.setBackground(Color.WHITE);
+		topMost.add(menuBar(),BorderLayout.NORTH);
+		topMost.add(mainBody(),BorderLayout.WEST);
+		return topMost;
+	}
+	private JPanel mainBody()
+	{
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setOpaque(false);
+		panel.add(sideBar(),BorderLayout.WEST);
+		panel.add(topPanel(),BorderLayout.CENTER);
+		return panel;
+	}
+	private JPanel sideBar()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+		panel.setOpaque(false);
+		
+		panel.add(sideBarPanel("../lib/homy.png","Home"));
+		panel.add(sideBarPanel("../lib/register.png","Register Vehicle"));
+		panel.add(sideBarPanel("../lib/vehicle.png","Vehicle History"));
+		panel.add(sideBarPanel("../lib/logs1.png","Veiw Logs"));
+		panel.add(Box.createVerticalGlue());
+		panel.add(sideBarPanel("../lib/logOut.png","Log Out"));
+		panel.setPreferredSize(new Dimension(200, getHeight())); // Width 200p
+		return panel;
+	}
+	private JPanel sideBarPanel(String path, String text)
+	{
+		JPanel panel = new JPanel(new BorderLayout());
+		ImageIcon home = new ImageIcon(path);
+		Image homeImg = home.getImage().getScaledInstance(25,25,Image.SCALE_SMOOTH);
+		ImageIcon resizedHome = new ImageIcon(homeImg);
+		
+		JLabel label = new JLabel(text);
+		label.setBorder(new EmptyBorder(0, 50, 0, 10)); // 0px top/bottom, 30px left/right
 
-
-
+		
+		panel.setSize(new Dimension(200,40));
+		panel.setOpaque(false);
+		panel.setBorder(BorderFactory.createRaisedBevelBorder());
+		
+		panel.add(new JLabel(resizedHome),BorderLayout.WEST);
+		panel.add(label,BorderLayout.EAST);
+		return panel;
+	}
 	private JPanel topPanel()
 	{
 		JPanel top = new JPanel(new BorderLayout());
 		top.add(createSummaryPanel(), BorderLayout.WEST);
-		top.add(logo(), BorderLayout.EAST);
+		//top.add(logo(), BorderLayout.EAST);
 		top.setBackground(Color.WHITE);
 		return top;
 		 
 	}
-	private JPanel logo()
+	public JPanel menuBar()
 	{
-        JPanel logoPanel = new JPanel(new BorderLayout());
-        logoPanel.setOpaque(false);
-        logoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Load the logo image (make sure the file path is correct)
-        ImageIcon originalIcon = new ImageIcon("../lib/MULogo.jpeg"); // Or "resources/logo.png" if in a folder
-        Image image = originalIcon.getImage().getScaledInstance(100,100,Image.SCALE_SMOOTH);
-        ImageIcon resizedIcon = new ImageIcon(image);
-        JLabel logoLabel = new JLabel(resizedIcon, SwingConstants.CENTER);
-
-        logoPanel.add(logoLabel, BorderLayout.NORTH);
-        JLabel label = new JLabel("MU VEHICLE TRACKING SYSTEM");
-        label.setFont(new Font("Arial",Font.BOLD,20));
-        label.setForeground(new Color(73, 88, 181));
-        logoPanel.add(label,BorderLayout.SOUTH);
-        JPanel finalPanel = new JPanel();
-        finalPanel.setOpaque(false);
-        finalPanel.add(logoPanel, BorderLayout.NORTH);
-        return finalPanel;
+		ImageIcon img = new ImageIcon("../lib/MULogo.jpeg");
+		Image image = img.getImage().getScaledInstance(50,50,Image.SCALE_SMOOTH);
+		ImageIcon resizedImage = new ImageIcon(image);
+		
+		JLabel mu = new JLabel("Mulungushi University Vehicle Tracking System");
+		mu.setFont(new Font("Arial",Font.BOLD,20));
+        mu.setForeground(new Color(73, 88, 181));
+		
+		ImageIcon logIn = new ImageIcon("../lib/logIn.jpeg");
+		Image logInImg = logIn.getImage().getScaledInstance(25,25,Image.SCALE_SMOOTH);
+		ImageIcon resizedLogInImg = new ImageIcon(logInImg);
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		panel.setBackground(Color.WHITE);
+		panel.setBorder(BorderFactory.createRaisedBevelBorder());
+		
+		JLabel label = new JLabel(resizedLogInImg);
+		label.setBorder(new EmptyBorder(0, 10, 0, 10)); // 0px top/bottom, 30px left/right
+		
+		panel.add(new JLabel(resizedImage));
+		panel.add(Box.createHorizontalGlue());
+		panel.add(mu);
+		panel.add(Box.createHorizontalGlue());
+		panel.add(new Notification());
+		panel.add(label);
+		
+		return panel;
+		
 	}
-	private JPanel center()
+
+	/*private JPanel center()
 	{
 		JPanel centerPanel = new JPanel(new GridLayout(1,1,20,20));
-		centerPanel.add(ShortCheckInOut());
-		centerPanel.add(regVehicleUI());
+		centerPanel.add(topPanel());
 		centerPanel.setBackground(Color.WHITE);
 		return centerPanel;
-	}
+	}*/
 
     private JPanel createSummaryPanel() {
         JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -74,15 +137,15 @@ public class Dashboard extends JFrame {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         mainPanel.setOpaque(false);
         
-        JPanel gridPanel = new JPanel(new GridLayout(2, 3, 10, 10));
-        gridPanel.setPreferredSize(new Dimension(3 * 220 + 20, 2 * 120 + 10)); // Calculate total size
+        JPanel gridPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        gridPanel.setSize(new Dimension(400, 300)); // Calculate total size
         
         // Add 6 panels (2 rows × 3 columns)
-        for (int i = 0; i < 4; i++) {
-            gridPanel.add(livePanel("this is a dummy text", 50,200,100));
-        }
         gridPanel.setOpaque(false);
-        gridPanel.add(livePanel("Visitors Today", 50,400,100));
+        gridPanel.add(livePanel("Total Checkins", 75,300,150));
+        gridPanel.add(livePanel("active guards", 1,300,150));
+        gridPanel.add(livePanel("Total Check-outs", 25,300,150));
+        gridPanel.add(livePanel("alerts", 25,300,150));
         mainPanel.add(gridPanel);
         return mainPanel;
     }
@@ -289,3 +352,69 @@ class RoundedPanel extends JPanel {
     }
 
 }
+
+
+
+
+class Notification extends JLabel {
+    private int notificationCount = 2;
+    private ImageIcon originalIcon;
+    private static final int ICON_SIZE = 25;
+
+    public Notification() {
+        try {
+            // Load icon from file
+            File iconFile = new File("../lib/notificationIcon.png");
+            BufferedImage originalImage = ImageIO.read(iconFile);
+            originalIcon = new ImageIcon(originalImage);
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("Error loading icon: " + e.getMessage());
+        }
+        setIcon(createCompositeIcon());
+    }
+
+    public void setNotificationCount(int count) {
+        this.notificationCount = Math.max(0, count);
+        setIcon(createCompositeIcon());
+    }
+
+    private ImageIcon createCompositeIcon() {
+        BufferedImage image = new BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Draw base icon
+        Image scaledIcon = originalIcon.getImage().getScaledInstance(
+            ICON_SIZE, ICON_SIZE, Image.SCALE_SMOOTH);
+        g2d.drawImage(scaledIcon, 0, 0, null);
+
+        // Draw notification badge
+        if (notificationCount > 0) {
+            int badgeSize = 15;
+            int badgeX = ICON_SIZE - badgeSize;
+            int badgeY = 0;
+
+            // Red circle background
+            g2d.setColor(new Color(255, 59, 48)); // iOS-style red
+            g2d.fillOval(badgeX, badgeY, badgeSize, badgeSize);
+
+            // White text
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.BOLD, 12));
+            
+            String countText = notificationCount > 99 ? "99+" : String.valueOf(notificationCount);
+            FontMetrics fm = g2d.getFontMetrics();
+            int textX = badgeX + (badgeSize - fm.stringWidth(countText)) / 2;
+            int textY = badgeY + (badgeSize - fm.getHeight()) / 2 + fm.getAscent();
+            
+            g2d.drawString(countText, textX, textY);
+        }
+
+        g2d.dispose();
+        return new ImageIcon(image);
+    }
+
+
+            
+}
+
