@@ -13,60 +13,67 @@ import java.io.File;
 import java.io.IOException;
 
 public class Dashboard extends JFrame {
+    // Add main content container reference
     private JLabel registerVehicle;
     private JLabel licencePlate, ownerName, permitType;
     private JTextField licencePlateTextField, ownerNameTextField;
     private JButton addVehicleButton;
     private JComboBox permitTypeComboBox;
     private JButton ExportCSV, ExportPDF , ViewLogs;
+    private JPanel mainContentContainer;
     
     public Dashboard() {
-		JPanel mainPanel = new JPanel();
-		setContentPane(mainPanel);
-        mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
+        JPanel mainPanel = new JPanel();
+        setContentPane(mainPanel);
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         add(topMostPanel());
-        //add(center(),BorderLayout.CENTER);
-        //add(bottom(), BorderLayout.SOUTH);
         pack();
         setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Make window fullscreen
     }
-	private JPanel topMostPanel()
-	{
-		JPanel topMost = new JPanel(new BorderLayout());
-		topMost.setBackground(Color.WHITE);
-		topMost.add(menuBar(),BorderLayout.NORTH);
-		topMost.add(mainBody(),BorderLayout.WEST);
-		return topMost;
-	}
-	private JPanel mainBody()
-	{
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setOpaque(false);
-		panel.add(sideBar(),BorderLayout.WEST);
-		panel.add(topPanel(),BorderLayout.CENTER);
-		return panel;
-	}
-	private JPanel sideBar()
-	{
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
-		panel.setOpaque(false);
-		
-		panel.add(sideBarPanel("../lib/homy.png","Home"));
-		panel.add(sideBarPanel("../lib/register.png","Register Vehicle"));
-		panel.add(sideBarPanel("../lib/vehicle.png","Vehicle History"));
-		panel.add(sideBarPanel("../lib/logs1.png","Veiw Logs"));
-		panel.add(Box.createVerticalGlue());
-		panel.add(sideBarPanel("../lib/logOut.png","Log Out"));
-		panel.setPreferredSize(new Dimension(200, getHeight())); // Width 200p
-		return panel;
-	}
-	private JPanel sideBarPanel(String path, String text)
-	{
-		JPanel panel = new JPanel(new BorderLayout());
-		ImageIcon home = new ImageIcon(path);
+
+    private JPanel topMostPanel() {
+        JPanel topMost = new JPanel(new BorderLayout());
+        topMost.setBackground(Color.WHITE);
+        topMost.add(menuBar(), BorderLayout.NORTH);
+        topMost.add(mainBody(), BorderLayout.CENTER); // Modified
+        return topMost;
+    }
+
+    private JPanel mainBody() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        panel.setOpaque(false);
+        panel.add(sideBar());
+        
+        // Initialize main content container
+        mainContentContainer = new JPanel(new BorderLayout());
+        mainContentContainer.add(HomePage.home(), BorderLayout.CENTER);
+        
+        panel.add(mainContentContainer);
+        return panel;
+    }
+
+    private JPanel sideBar() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        
+        panel.add(sideBarPanel("../lib/homy.png", "Home", HomePage.home()));
+        panel.add(sideBarPanel("../lib/register.png", "Register Vehicle", regVehicleUI()));
+        panel.add(sideBarPanel("../lib/vehicle.png", "Vehicle History", vehicleHistoryUI()));
+        panel.add(sideBarPanel("../lib/logs1.png", "View Logs", viewLogsUI()));
+        panel.add(Box.createVerticalGlue());
+        panel.add(sideBarPanel("../lib/logOut.png", "Log Out", new JPanel())); // Add proper logout panel
+        
+        panel.setSize(new Dimension(200, getHeight()));
+        return panel;
+    }
+
+    private JPanel sideBarPanel(String path, String text, JPanel targetPanel) {
+        JPanel panel = new JPanel(new BorderLayout());
+        ImageIcon home = new ImageIcon(path);
 		Image homeImg = home.getImage().getScaledInstance(25,25,Image.SCALE_SMOOTH);
 		ImageIcon resizedHome = new ImageIcon(homeImg);
 		
@@ -74,23 +81,49 @@ public class Dashboard extends JFrame {
 		label.setBorder(new EmptyBorder(0, 50, 0, 10)); // 0px top/bottom, 30px left/right
 
 		
-		panel.setSize(new Dimension(200,40));
+		panel.setMaximumSize(new Dimension(200,Integer.MAX_VALUE));
 		panel.setOpaque(false);
 		panel.setBorder(BorderFactory.createRaisedBevelBorder());
+		panel.setForeground(new Color(73, 88, 181));
 		
 		panel.add(new JLabel(resizedHome),BorderLayout.WEST);
 		panel.add(label,BorderLayout.EAST);
-		return panel;
-	}
-	private JPanel topPanel()
-	{
-		JPanel top = new JPanel(new BorderLayout());
-		top.add(createSummaryPanel(), BorderLayout.WEST);
-		//top.add(logo(), BorderLayout.EAST);
-		top.setBackground(Color.WHITE);
-		return top;
-		 
-	}
+		JPanel myPanel = new JPanel();
+        
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                switchContent(targetPanel);
+            }
+            
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                panel.setBackground(new Color(240, 240, 240));
+                panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                panel.setBackground(null);
+                panel.setCursor(Cursor.getDefaultCursor());
+            }
+        });
+        return panel;
+    }
+
+    private void switchContent(JPanel newPanel) {
+        mainContentContainer.removeAll();
+        mainContentContainer.add(newPanel, BorderLayout.CENTER);
+        mainContentContainer.revalidate();
+        mainContentContainer.repaint();
+    }
+
+    // Add proper panel methods
+    private JPanel vehicleHistoryUI() {
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Vehicle History Content"));
+        return panel;
+    }
 	public JPanel menuBar()
 	{
 		ImageIcon img = new ImageIcon("../lib/MULogo.jpeg");
@@ -122,196 +155,82 @@ public class Dashboard extends JFrame {
 		return panel;
 		
 	}
+    
+	private JPanel regVehicleUI() {
 
-	/*private JPanel center()
-	{
-		JPanel centerPanel = new JPanel(new GridLayout(1,1,20,20));
-		centerPanel.add(topPanel());
-		centerPanel.setBackground(Color.WHITE);
-		return centerPanel;
-	}*/
+    RoundedPanel registrationUI = new RoundedPanel(50);
+    registrationUI.setBorder(BorderFactory.createRaisedBevelBorder());
+    
+    // Use GridBagLayout for precise control
+    registrationUI.setLayout(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(5, 5, 5, 5); // Padding
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
 
-    private JPanel createSummaryPanel() {
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setBorder(BorderFactory.createLoweredBevelBorder());
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        mainPanel.setOpaque(false);
-        
-        JPanel gridPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-        gridPanel.setSize(new Dimension(400, 300)); // Calculate total size
-        
-        // Add 6 panels (2 rows × 3 columns)
-        gridPanel.setOpaque(false);
-        gridPanel.add(livePanel("Total Checkins", 75,300,150));
-        gridPanel.add(livePanel("active guards", 1,300,150));
-        gridPanel.add(livePanel("Total Check-outs", 25,300,150));
-        gridPanel.add(livePanel("alerts", 25,300,150));
-        mainPanel.add(gridPanel);
-        return mainPanel;
-    }
+    // Header
+    JLabel registerVehicleLabel = new JLabel("Register Vehicle");
+    registerVehicleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    registerVehicleLabel.setForeground(new Color(73, 88, 181));
+    gbc.gridwidth = 2;
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    registrationUI.add(registerVehicleLabel, gbc);
 
-    private JPanel livePanel(String words, int value,int Dimension1,int Dimension2) {
-        //JPanel panel = new JPanel();
-        RoundedPanel panel = new RoundedPanel(20);
-        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setPreferredSize(new Dimension(Dimension1, Dimension2));
-        
-        JLabel text = new JLabel(words);
-        
-        JPanel textHolder = new JPanel(new BorderLayout());
-        textHolder.add(text, BorderLayout.EAST);
-        textHolder.setOpaque(false);
-        
-        
-        JLabel sum = new JLabel(Integer.toString(value));
-        sum.setFont(new Font("Arial",Font.BOLD,50));
-        
-        JPanel sumHolder = new JPanel(new BorderLayout());
-        sumHolder.add(sum, BorderLayout.EAST);
-        sumHolder.setOpaque(false);
-        
-        
-        
-        panel.add(Box.createHorizontalGlue());
-        panel.add(sumHolder);
-        panel.add(Box.createHorizontalGlue());
-        panel.add(textHolder);
-        
-        
-        panel.setBackground(new Color(73, 88, 181));
-        text.setForeground(Color.WHITE);
-        sum.setForeground(Color.WHITE);
-        
-        
-        
-        panel.addMouseListener(new MouseAdapter() {
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			panel.setBackground(new Color(213, 59, 51));
-			panel.repaint();
-		}
-		
-		@Override
-		public void mouseExited(MouseEvent e) {
-			panel.setBackground(new Color(73,88,181));
-			panel.repaint();
-		}
-	});
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+    // Form fields
+    gbc.gridwidth = 1;
+    
+    // License Plate
+    gbc.gridy++;
+    JLabel licencePlateLabel = new JLabel("License Plate:");
+    registrationUI.add(licencePlateLabel, gbc);
+
+    gbc.gridx = 1;
+    JTextField licencePlateTextField = new JTextField(15);
+    registrationUI.add(licencePlateTextField, gbc);
+    gbc.gridx = 0;
+
+    // Owner's Name
+    gbc.gridy++;
+    JLabel ownerNameLabel = new JLabel("Owner's Name:");
+    registrationUI.add(ownerNameLabel, gbc);
+
+    gbc.gridx = 1;
+    JTextField ownerNameTextField = new JTextField(15);
+    registrationUI.add(ownerNameTextField, gbc);
+    gbc.gridx = 0;
+
+    // Permit Type
+    gbc.gridy++;
+    JLabel permitTypeLabel = new JLabel("Permit Type:");
+    registrationUI.add(permitTypeLabel, gbc);
+
+    gbc.gridx = 1;
+    String[] permitTypes = {"Visitor", "Staff", "Student"};
+    JComboBox<String> permitTypeComboBox = new JComboBox<>(permitTypes);
+    registrationUI.add(permitTypeComboBox, gbc);
+    gbc.gridx = 0;
+
+    // Button
+    gbc.gridy++;
+    gbc.gridwidth = 2;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.anchor = GridBagConstraints.CENTER;
+    RoundedButton addVehicleButton = new RoundedButton("Check In", 20, 
+        new Color(73, 88, 181), new Color(59, 89, 182));
+    addVehicleButton.setPreferredSize(new Dimension(200, 40));
+    registrationUI.add(addVehicleButton, gbc);
+
+    return registrationUI;
+}
+    private JPanel viewLogsUI() {
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("View Logs Content"));
         return panel;
     }
 
-    private JScrollPane ShortCheckInOut()
-    {
-		String[] columns = new String[]{"Entry ID", "License Plate", "Owner Name", "Check-In Time", "Check-Out","Status"};
-		Object[][] data = {
-                {"KAB123A", "BAD238","John Doe", "12:00 PM","true", "Checked Out"},
-                {"KCD456B", "BAD558","Jane Smith", "9:30 AM", "false", "Checked In"},
-        };
-		JTable tabel = new JTable(data, columns);
-		tabel.setOpaque(false);
-		styleTable(tabel);
-		JScrollPane scrollPane = new JScrollPane(tabel);
-		scrollPane.setOpaque(false);
-		return scrollPane;
-      }
-    private static void styleTable(JTable table)
-    {
-        // Font and Row Height
-        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        table.setRowHeight(28);
-
-        // Header Styling
-        JTableHeader header = table.getTableHeader();
-        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        header.setBackground(new Color(30, 58, 95));
-        header.setForeground(Color.WHITE);
-        header.setPreferredSize(new Dimension(100, 35));
-
-        // Row striping (alternating colors)
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object val, boolean isSelected,
-                                                           boolean hasFocus, int row, int col) {
-                Component c = super.getTableCellRendererComponent(t, val, isSelected, hasFocus, row, col);
-                if (isSelected) {
-                    c.setBackground(new Color(46, 90, 138));
-                    c.setForeground(Color.WHITE);
-                } else {
-                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
-                    c.setForeground(Color.BLACK);
-                }
-                return c;
-            }
-        });
-
-        // Grid color and spacing
-        table.setGridColor(new Color(220, 220, 220));
-        table.setShowHorizontalLines(true);
-        table.setShowVerticalLines(false);
-	}
-    private JPanel regVehicleUI()
-    {
-
-		RoundedPanel registrationUI = new RoundedPanel(50);
-        JLabel registerVehicleLabel = new JLabel("Register Vehicle");
-        registerVehicleLabel.setBounds(10, 20, 300, 40); // Adjust size for better visibility
-        registerVehicleLabel.setFont(new Font("Arial", Font.BOLD, 14)); // Set font style, weight, and size
-        registerVehicleLabel.setForeground(new Color(73,88,181)); // Set text color
-        registrationUI.setBorder(BorderFactory.createRaisedBevelBorder());
-        registrationUI.add(registerVehicleLabel);
-
-        JLabel licencePlateLabel = new JLabel("License Plate:");
-        licencePlateLabel.setBounds(10, 70, 100, 25);
-        registrationUI.add(licencePlateLabel);
-        
-        JTextField licencePlateTextField = new JTextField();
-        licencePlateTextField.setBounds(150, 70, 200, 25);
-        registrationUI.add(licencePlateTextField);
-
-        JLabel ownerNameLabel = new JLabel("Owner's Name:");
-        ownerNameLabel.setBounds(10, 110, 100, 25);
-        registrationUI.add(ownerNameLabel);
-
-        JTextField ownerNameTextField = new JTextField();
-        ownerNameTextField.setBounds(150, 110, 200, 25);
-        registrationUI.add(ownerNameTextField);
-
-        JLabel permitTypeLabel = new JLabel("Permit Type:");
-        permitTypeLabel.setBounds(10, 150, 100, 25);
-        registrationUI.add(permitTypeLabel);
-
-        // Replace JTextField with JComboBox for a dropdown list of permit types
-        String[] permitTypes = {"Visitor", "Staff", "Student"};
-        JComboBox<String> permitTypeComboBox = new JComboBox<>(permitTypes);
-        permitTypeComboBox.setBounds(150, 150, 200, 25);
-        registrationUI.add(permitTypeComboBox);
-
-        RoundedButton addVehicleButton = new RoundedButton("Check In",20,new Color(73,88,181),new Color(59, 89, 182));
-        addVehicleButton.setBounds(150, 200, 120, 30);
-        addVehicleButton.setSize(new Dimension(200,40));
-        registrationUI.add(addVehicleButton);
-        registrationUI.setSize(500, 300);
-        registrationUI.setLayout(new BorderLayout(10, 10));
-        
-        
-        return registrationUI;
-        
-    }
-    private JPanel bottom()
+    // ... [rest of existing methods remain unchanged]
+       private JPanel bottom()
     {
         JPanel bottom = new JPanel(new BorderLayout());
 
@@ -326,34 +245,6 @@ public class Dashboard extends JFrame {
 
     }
 }
-
-
-class RoundedPanel extends JPanel {
-    private int cornerRadius;
-
-    public RoundedPanel(int cornerRadius) {
-        this.cornerRadius = cornerRadius;
-        setOpaque(false); // Make panel transparent to see rounded corners
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g.create();
-        
-        // Enable anti-aliasing for smoother edges
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        // Fill a rounded rectangle
-        g2d.setColor(getBackground());
-        g2d.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
-        
-        g2d.dispose();
-    }
-
-}
-
-
 
 
 class Notification extends JLabel {
@@ -417,4 +308,3 @@ class Notification extends JLabel {
 
             
 }
-
