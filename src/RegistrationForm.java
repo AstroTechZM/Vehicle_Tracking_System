@@ -44,10 +44,9 @@ public class RegistrationForm {
             BorderFactory.createEmptyBorder(20, 20, 20, 20))
         );
         formPanel.setOpaque(false);
-		
-		JTextField
+
         // Form Fields
-        addFormField(formPanel, "First Name:", , 0);
+        addFormField(formPanel, "First Name:", new JTextField(20), 0);
         addFormField(formPanel, "Last Name:", new JTextField(20), 1);
         addFormField(formPanel, "Email:", new JTextField(20), 2);
         addFormField(formPanel, "Password:", new JPasswordField(20), 3);
@@ -69,7 +68,7 @@ public class RegistrationForm {
         RoundedButton registerButton = new RoundedButton("Register",20,new Color(200, 50, 50), new Color(220, 70, 70));
         registerButton.setPreferredSize(new Dimension(200,40));
         //registerButton.setBounds(150, 200, 120, 30);
-        registerButton.addActionListener(this::validateForm);
+        //registerButton.addActionListener(this::validateForm());
 
         gbc.gridx = 0;
         gbc.gridy = 6;
@@ -132,6 +131,6 @@ public class RegistrationForm {
     }
     private static void validateForm(String F_name,String L_name,String role,String password)
     {
-		DBConnections.CreateAccount(F_name,L_name,role,password)
+		DBConnections.CreateAccount(F_name,L_name,role,password);
 	}
 }
