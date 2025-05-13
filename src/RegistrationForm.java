@@ -14,9 +14,12 @@ public class RegistrationForm {
 	private static JTextField role;
 	private static JPasswordField password;
 	
-	static final private String url = "jdbc:mysql://localhost:3306/MU_Gate_Vehicle_Tracker?useSSL=false&serverTimezone=UTC";
-	static final private String username = "root";
-	static final private String accountPassword = "drexastro";
+	static final private String url = "jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?" +
+             "ssl=true" +
+             "&sslmode=require" +
+             "&sslrootcert=../lib/ca.pem";
+	static final private String username = "avnadmin";
+	static final private String accountPassword = "AVNS_Osn2GIElcOxqkzrLhEW";
 			
 
     public RegistrationForm() {
@@ -149,13 +152,11 @@ public class RegistrationForm {
         char[] passwordChars = password.getPassword();
         String passwords = new String(passwordChars); // Convert to String if needed
 		try(Connection connection = DriverManager.getConnection(url, username, accountPassword)){
-			//DBConnections conn = new DBConnections()
 			
 			DBConnections connections = new DBConnections(connection);
             connections.createAccount(firstName.getText(),lastName.getText(),role.getText(),passwords);
-            //connections.createAccount("henrie","mate","admin","wsxedc");
 		} catch(SQLException e){
-			System.out.println("found an error");
+			System.out.println(e);
 		}
 	}
 }

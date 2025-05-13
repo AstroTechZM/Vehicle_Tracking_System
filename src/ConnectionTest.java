@@ -2,8 +2,8 @@ import java.sql.*;
 
 public class ConnectionTest {
     public static void main(String[] args) {
-        String url = "jdbc:mysql://127.0.0.1:3306/MU_Gate_Vehicle_Tracker?useSSL=false";
-        String user = "root";
+        String url = "jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?ssl=true+&sslmode=require";
+        String user = "avnadmin";
         String password = "drexastro";
         
         try (Connection conn = DriverManager.getConnection(url, user, password)) {

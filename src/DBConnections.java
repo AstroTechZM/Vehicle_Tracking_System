@@ -8,15 +8,10 @@ import java.time.LocalDateTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-
 public class DBConnections
 {
-	/*static String url = "jdbc:mysql://localhost:3306/MU_Gate_Vehicle_Tracker?useSSL=false&serverTimezone=UTC";
-	static String username = "root";
-	static String password = "drexastro";
-	static Connection connection = null;*/
 	static Connection connection = null;
-	Statement statement = connection.createStatement();
+	
 	public DBConnections(Connection conn)
 		{
 			this.connection = conn;
@@ -31,7 +26,7 @@ public class DBConnections
             // Get a LocalDate object (from Java 8 onwards)
             LocalDateTime localDate = LocalDateTime.now();
             
-            
+            Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SELECT MAX(user_id) from user;");
             int user_id=1;
 			while(rs.next())
