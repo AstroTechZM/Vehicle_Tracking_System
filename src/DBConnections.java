@@ -5,6 +5,9 @@ import java.sql.*;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 
 public class DBConnections
 {
