@@ -69,8 +69,26 @@ public class DBConnections
         }
         
     }
-	public void logs()
-	{
-		
-	}
+
+
+    public static String hashPassword(String password) {
+        try {
+            // Create MessageDigest instance for SHA-256
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+            // Add password bytes to digest
+            byte[] hashedBytes = md.digest(password.getBytes());
+
+            // Convert byte array into signum representation
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+
+            // Return the hashed password in hexadecimal format
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
 }
