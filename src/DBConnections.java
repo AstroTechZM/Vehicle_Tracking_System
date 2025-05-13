@@ -16,21 +16,22 @@ public class DBConnections
 	static String password = "drexastro";
 	static Connection connection = null;*/
 	static Connection connection = null;
-		public DBConnections(Connection conn)
+	Statement statement = connection.createStatement();
+	public DBConnections(Connection conn)
 		{
 			this.connection = conn;
 		}
 
-		public void createAccount(String F_name,String L_name,String role,String password)
+	public void createAccount(String F_name,String L_name,String role,String password)
 		{
-			try {
-			//connection = DriverManager.getConnection(url, username, password);
+			try 
+			{
             PreparedStatement preparedStatement = connection.prepareStatement(
                      "INSERT INTO user (user_id,F_name,L_name,role,LPC,FLA,Account_locked,password ) VALUES (?, ?, ?,?,?,?,?,?)");
             // Get a LocalDate object (from Java 8 onwards)
             LocalDateTime localDate = LocalDateTime.now();
             
-            Statement statement = connection.createStatement();
+            
             ResultSet rs = statement.executeQuery("SELECT MAX(user_id) from user;");
             int user_id=1;
 			while(rs.next())
@@ -71,6 +72,8 @@ public class DBConnections
         }
         
     }
+
+
     public static String hashPassword(String password) {
         try {
             // Create MessageDigest instance for SHA-256
