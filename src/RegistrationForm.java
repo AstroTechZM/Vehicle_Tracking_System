@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.sql.*;
 import java.awt.event.ActionEvent;
 
 public class RegistrationForm {
@@ -7,6 +8,16 @@ public class RegistrationForm {
     private static final Color SECONDARY_COLOR = new Color(255, 255, 255);
     private static final Font LABEL_FONT = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 24);
+    
+    private static JTextField firstName;
+	private static JTextField lastName;
+	private static JTextField role;
+	private static JPasswordField password;
+	
+	static final private String url = "jdbc:mysql://localhost:3306/MU_Gate_Vehicle_Tracker?useSSL=false&serverTimezone=UTC";
+	static final private String username = "root";
+	static final private String accountPassword = "drexastro";
+			
 
     public RegistrationForm() {
         JFrame frame = new JFrame("University Vehicle Registration");
@@ -44,12 +55,16 @@ public class RegistrationForm {
             BorderFactory.createEmptyBorder(20, 20, 20, 20))
         );
         formPanel.setOpaque(false);
-
+		
+		firstName = new JTextField(20);
+		lastName = new JTextField(20);
+		role = new JTextField(20);
+		password = new JPasswordField(20);
         // Form Fields
-        addFormField(formPanel, "First Name:", new JTextField(20), 0);
-        addFormField(formPanel, "Last Name:", new JTextField(20), 1);
-        addFormField(formPanel, "Email:", new JTextField(20), 2);
-        addFormField(formPanel, "Password:", new JPasswordField(20), 3);
+        addFormField(formPanel, "First Name:", firstName, 0);
+        addFormField(formPanel, "Last Name:", lastName, 1);
+        addFormField(formPanel, "Role:", role, 2);
+        addFormField(formPanel, "Password:", password, 3);
 
         // Gender Selection
         JPanel genderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -68,7 +83,7 @@ public class RegistrationForm {
         RoundedButton registerButton = new RoundedButton("Register",20,new Color(200, 50, 50), new Color(220, 70, 70));
         registerButton.setPreferredSize(new Dimension(200,40));
         //registerButton.setBounds(150, 200, 120, 30);
-        //registerButton.addActionListener(this::validateForm());
+        registerButton.addActionListener(RegistrationForm::validateForm);
 
         gbc.gridx = 0;
         gbc.gridy = 6;
@@ -129,8 +144,18 @@ public class RegistrationForm {
         );
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
-    private static void validateForm(String F_name,String L_name,String role,String password)
+    private static void validateForm(ActionEvent thisErr)
     {
-		DBConnections.CreateAccount(F_name,L_name,role,password);
+        char[] passwordChars = password.getPassword();
+        String passwords = new String(passwordChars); // Convert to String if needed
+		try(Connection connection = DriverManager.getConnection(url, username, accountPassword)){
+			//DBConnections conn = new DBConnections()
+			
+			DBConnections connections = new DBConnections(connection);
+            connections.createAccount(firstName.getText(),lastName.getText(),role.getText(),passwords);
+            //connections.createAccount("henrie","mate","admin","wsxedc");
+		} catch(SQLException e){
+			System.out.println("found an error");
+		}
 	}
 }

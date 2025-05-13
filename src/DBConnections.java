@@ -8,15 +8,20 @@ import java.time.LocalDateTime;
 
 public class DBConnections
 {
-	static String url = "jdbc:mysql://localhost:3306/MU_Gate_Vehicle_Tracker";
+	/*static String url = "jdbc:mysql://localhost:3306/MU_Gate_Vehicle_Tracker?useSSL=false&serverTimezone=UTC";
 	static String username = "root";
 	static String password = "drexastro";
+	static Connection connection = null;*/
 	static Connection connection = null;
+		public DBConnections(Connection conn)
+		{
+			this.connection = conn;
+		}
 
-		public static void CreateAccount(String F_name,String L_name,String role,String password)
+		public void createAccount(String F_name,String L_name,String role,String password)
 		{
 			try {
-			connection = DriverManager.getConnection(url, username, password);
+			//connection = DriverManager.getConnection(url, username, password);
             PreparedStatement preparedStatement = connection.prepareStatement(
                      "INSERT INTO user (user_id,F_name,L_name,role,LPC,FLA,Account_locked,password ) VALUES (?, ?, ?,?,?,?,?,?)");
             // Get a LocalDate object (from Java 8 onwards)
@@ -61,5 +66,6 @@ public class DBConnections
             System.err.println("Error inserting data (PreparedStatement): " + e.getMessage());
             e.printStackTrace();
         }
+        
     }
 }
