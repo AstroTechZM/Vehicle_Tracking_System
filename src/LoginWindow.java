@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.sql.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.*;
 
@@ -122,24 +123,33 @@ public class LoginWindow extends JFrame {
         String password = new String(passwordField.getPassword()).trim();
         
         // Simple authentication (in real app, use database)
-        if (username.equals("admin") && password.equals("admin123")) {
-            SwingUtilities.invokeLater(() -> {
-                dashboard.setVisible(true);
-                this.dispose();
-            });
-        } else if (username.equals("guard") && password.equals("guard123")) {
-            SwingUtilities.invokeLater(() -> {
-                dashboard.setVisible(true);
-                this.dispose();
-            });
-        } else {
-            JOptionPane.showMessageDialog(this, 
-                "Invalid username or password", 
-                "Login Error", 
-                JOptionPane.ERROR_MESSAGE);
-        }
+        
+        try(Connection connection = DriverManager.getConnection("jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?" +
+             "ssl=true" +
+             "&sslmode=require" +
+             "&sslrootcert=../lib/ca.pem",
+              "avnadmin", 
+              "AVNS_Osn2GIElcOxqkzrLhEW")){
+			
+			DBConnections connections = new DBConnections(connection);
+            
+		
+			if (connections.logIn(username,password)) {
+				SwingUtilities.invokeLater(() -> {
+					dashboard.setVisible(true);
+					this.dispose();
+				});
+			}  else {
+				JOptionPane.showMessageDialog(this, 
+					"Invalid username or password", 
+					"Login Error", 
+					JOptionPane.ERROR_MESSAGE);
+			}
+        } catch(SQLException x){
+			System.out.println(x);
+		}
     }
-    private void performRegistration(ActionEvent e)
+    private void performRegistration(ActionEvent z)
     {
 		new RegistrationForm();
 	}

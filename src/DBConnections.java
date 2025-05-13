@@ -68,8 +68,36 @@ public class DBConnections
         
     }
 
-
-    public static String hashPassword(String password) {
+	public boolean logIn(String user_name,String password)
+	{
+		try 
+			{
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT password FROM user WHERE F_name=?");
+            preparedStatement.setString(1,user_name);
+            
+             try (ResultSet rs = preparedStatement.executeQuery()) {
+				while (rs.next()) {
+					// Process results
+					String cpassword = rs.getString("password");
+					//String name = rs.getString("username");
+					System.out.println("ID: " + cpassword);
+					if(password.equals(cpassword)) return true;
+					else return false;
+					
+				}
+			} catch(SQLException e) {
+				System.err.println("Error inserting data (PreparedStatement): " + e.getMessage());
+				e.printStackTrace();
+        }
+		
+	} catch(SQLException e) {
+				System.err.println("Error inserting data (PreparedStatement): " + e.getMessage());
+				e.printStackTrace();
+     }
+     return false;
+   }
+    
+    public String hashPassword(String password) {
         try {
             // Create MessageDigest instance for SHA-256
             MessageDigest md = MessageDigest.getInstance("SHA-256");
