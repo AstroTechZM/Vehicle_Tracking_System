@@ -7,12 +7,14 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class DBConnections
 {
 	static Connect conn = new Connect();
 	static Connection connection = conn.conn();
-	
+	static int user_id=1;
 
 	public static Connection getConnection(){
 		return connection;
@@ -28,7 +30,7 @@ public class DBConnections
             
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SELECT MAX(user_id) from user;");
-            int user_id=1;
+            
 			while(rs.next())
 			{
 				int value = rs.getInt(1);
@@ -118,51 +120,112 @@ public class DBConnections
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
     }
-    public static void addVehicle(String plate,String ownername,String permit){
-		System.out.println("start");
-		try{
-			Statement statement = connection.createStatement();
-			//int rs = statement.executeUpdate("ALTER TABLE Vehicle drop column owner_lname;");
-			ResultSet rs = statement.executeQuery("SELECT * FROM Vehicle;");
-			if (connection == null) {
-        System.err.println("Error: Database connection is null. Cannot add vehicle.");
-        return; // Exit the method
+public static boolean addVehicle(String plate, String ownername, String permit) {
+    System.out.println("Starting vehicle logging...");
+    
+    // Validate required parameters first
+    if (plate == null || plate.trim().isEmpty() || ownername == null || ownername.trim().isEmpty()) {
+        System.err.println("Error: Plate number and owner name cannot be empty");
+        return false;
     }
 
-			while(rs.next()){
-				int value = rs.getInt(1);
-				System.out.println(value);
-			}
-			System.out.println("stop");
-			PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO Vehicle(vehicle_id,plate_number,owner_fname,user_id,permit_id,entry_log_id) VALUES(?,?,?,?,?,?)");
-			preparedStatement.setInt(1,1);//vehicle_id
-			preparedStatement.setString(2,plate);//plate_id
-			preparedStatement.setString(3,ownername);
-			preparedStatement.setInt(4,1);//user_id
-			preparedStatement.setInt(5,1);//permit_id
-			preparedStatement.setInt(6,1);//entry_log_id
-			
-			// Execute all
-			preparedStatement.executeUpdate();
-		} catch(SQLException s){
-			System.out.println(s);
-		}
-	}
+    try {
+        // 1. Verify the user exists
+        if (!isValidUser(user_id)) {
+            System.err.println("Error: Invalid user ID " + user_id + " - user doesn't exist");
+            return false;
+        }
 
+        // 2. Get current timestamp
+        LocalDateTime now = LocalDateTime.now();
+        Timestamp time = Timestamp.valueOf(now);
+
+        // 3. Get IP address
+        String ipAddress = getIP();
+        if (ipAddress == null || ipAddress.trim().isEmpty()) {
+            ipAddress = "0.0.0.0"; // Default value if IP can't be obtained
+        }
+
+        // 4. Create log entry
+        String logSql = "INSERT INTO logs " +
+                       "(plate_number, owner_fname, user_id, time_stamp, ip_address, action) " +
+                       "VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(logSql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, plate.trim());
+            pstmt.setString(2, ownername.trim());
+            pstmt.setInt(3, user_id);
+            pstmt.setTimestamp(4, time);
+            pstmt.setString(5, ipAddress);
+            pstmt.setString(6, "vehicle added");
+
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int logId = rs.getInt(1);
+                        System.out.println("Vehicle logged successfully with ID: " + logId);
+                        return true;
+                    }
+                }
+            }
+        }
+    } catch (SQLException e) {
+        handleDatabaseError(e);
+    }
+    return false;
 }
 
+// Helper method to validate user existence
+private static boolean isValidUser(int userId) throws SQLException {
+    String sql = "SELECT COUNT(*) FROM user WHERE user_id = ?";
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setInt(1, userId);
+        try (ResultSet rs = pstmt.executeQuery()) {
+            return rs.next() && rs.getInt(1) > 0;
+        }
+    }
+}
+
+// Improved error handling
+private static void handleDatabaseError(SQLException e) {
+    if (e.getMessage().contains("foreign key constraint fails")) {
+        System.err.println("Database error: Referenced user doesn't exist");
+    } else if (e.getMessage().contains("Data too long")) {
+        System.err.println("Database error: One or more values exceed column length");
+    } else {
+        System.err.println("Database error: " + e.getMessage());
+    }
+    e.printStackTrace();
+}
+    public static String getIP() {
+	
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            return ip.getHostAddress();
+        } catch (UnknownHostException e) {
+            System.out.println("Error getting IP address: " + e.getMessage());
+        }
+        return "error";
+    }
+}
 class Connect
 {
 	public Connection conn(){
 		Connection connection= null;
 		try
 		{
-			connection = DriverManager.getConnection("jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?" +
+			/*connection = DriverManager.getConnection("jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?" +
              "ssl=true" +
              "&sslmode=require" +
              "&sslrootcert=../lib/ca.pem",
               "avnadmin", 
-              "AVNS_Osn2GIElcOxqkzrLhEW");
+              "AVNS_Osn2GIElcOxqkzrLhEW");*/
+			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/MU_DB",
+              "root", 
+              "drexastro");
+              
               return connection;
 		} catch(SQLException e)
 		{
