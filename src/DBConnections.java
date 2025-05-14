@@ -10,14 +10,14 @@ import java.security.NoSuchAlgorithmException;
 
 public class DBConnections
 {
-	static Connection connection = null;
+	static Connect conn = new Connect();
+	static Connection connection = conn.conn();
+	
 
-	public DBConnections(Connection conn)
-		{
-			this.connection = conn;
-		}
-
-	public void createAccount(String F_name,String L_name,String role,String password)
+	public static Connection getConnection(){
+		return connection;
+	}
+	public static void createAccount(String F_name,String L_name,String role,String password)
 		{
 			try 
 			{
@@ -68,10 +68,11 @@ public class DBConnections
         
     }
 
-	public boolean logIn(String user_name,String password)
+	public static boolean logIn(String user_name,String password)
 	{
 		try 
 			{
+				
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT password FROM user WHERE F_name=?");
             preparedStatement.setString(1,user_name);
             
@@ -97,7 +98,7 @@ public class DBConnections
      return false;
    }
     
-    public String hashPassword(String password) {
+    public static String hashPassword(String password) {
         try {
             // Create MessageDigest instance for SHA-256
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -117,4 +118,29 @@ public class DBConnections
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
     }
+    public static String addVehicle(String plate,String ownername,String permit){
+		return "trex";
+	}
+
+}
+
+class Connect
+{
+	public Connection conn(){
+		Connection connection= null;
+		try
+		{
+			connection = DriverManager.getConnection("jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?" +
+             "ssl=true" +
+             "&sslmode=require" +
+             "&sslrootcert=../lib/ca.pem",
+              "avnadmin", 
+              "AVNS_Osn2GIElcOxqkzrLhEW");
+              return connection;
+		} catch(SQLException e)
+		{
+			System.out.println(e);
+		}
+		return connection;
+	}
 }

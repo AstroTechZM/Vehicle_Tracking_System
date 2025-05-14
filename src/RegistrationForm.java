@@ -151,12 +151,7 @@ public class RegistrationForm {
     {
         char[] passwordChars = password.getPassword();
         String passwords = new String(passwordChars); // Convert to String if needed
-		try(Connection connection = DriverManager.getConnection(url, username, accountPassword)){
-			
-			DBConnections connections = new DBConnections(connection);
-            connections.createAccount(firstName.getText(),lastName.getText(),role.getText(),passwords);
-		} catch(SQLException e){
-			System.out.println(e);
-		}
+			DBConnections.createAccount(firstName.getText(),lastName.getText(),role.getText(),passwords);
+
 	}
 }

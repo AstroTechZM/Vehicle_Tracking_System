@@ -122,19 +122,9 @@ public class LoginWindow extends JFrame {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
         
-        // Simple authentication (in real app, use database)
-        
-        try(Connection connection = DriverManager.getConnection("jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?" +
-             "ssl=true" +
-             "&sslmode=require" +
-             "&sslrootcert=../lib/ca.pem",
-              "avnadmin", 
-              "AVNS_Osn2GIElcOxqkzrLhEW")){
 			
-			DBConnections connections = new DBConnections(connection);
-            
 		
-			if (connections.logIn(username,password)) {
+			if (DBConnections.logIn(username,password)) {
 				SwingUtilities.invokeLater(() -> {
 					dashboard.setVisible(true);
 					this.dispose();
@@ -145,9 +135,7 @@ public class LoginWindow extends JFrame {
 					"Login Error", 
 					JOptionPane.ERROR_MESSAGE);
 			}
-        } catch(SQLException x){
-			System.out.println(x);
-		}
+         
     }
     private void performRegistration(ActionEvent z)
     {

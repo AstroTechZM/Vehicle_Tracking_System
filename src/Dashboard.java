@@ -21,6 +21,7 @@ public class Dashboard extends JFrame {
     private JComboBox permitTypeComboBox;
     private JButton ExportCSV, ExportPDF , ViewLogs;
     private JPanel mainContentContainer;
+
     
     public Dashboard() {
         JPanel mainPanel = new JPanel();
@@ -118,7 +119,7 @@ public class Dashboard extends JFrame {
         mainContentContainer.repaint();
     }
 
-    // Add proper panel methods
+
     private JPanel vehicleHistoryUI() {
         JPanel panel = new JPanel();
         //panel.add(new JLabel("Vehicle History Content"));
@@ -130,7 +131,7 @@ public class Dashboard extends JFrame {
         model.addColumn("OWENER NAME");
         model.addColumn("USER ID");
         model.addColumn("PERMIT ID");
-         model.addColumn("PERMIT ID");
+        model.addColumn("PERMIT ID");
 
         model.addRow(new Object[]{"John Doe", 30});
         model.addRow(new Object[]{"Jane Doe", 25});
@@ -239,8 +240,8 @@ public class Dashboard extends JFrame {
     gbc.gridwidth = 2;
     gbc.fill = GridBagConstraints.NONE;
     gbc.anchor = GridBagConstraints.CENTER;
-    RoundedButton addVehicleButton = new RoundedButton("Check In", 20, 
-        new Color(73, 88, 181), new Color(59, 89, 182));
+    RoundedButton addVehicleButton = new RoundedButton("Check In", 20, new Color(73, 88, 181), new Color(59, 89, 182));
+    addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
     addVehicleButton.setPreferredSize(new Dimension(200, 40));
     registrationUI.add(addVehicleButton, gbc);
 
@@ -252,7 +253,6 @@ public class Dashboard extends JFrame {
         return panel;
     }
 
-    // ... [rest of existing methods remain unchanged]
        private JPanel bottom()
     {
         JPanel bottom = new JPanel(new BorderLayout());
@@ -267,6 +267,14 @@ public class Dashboard extends JFrame {
 		return bottom;
 
     }
+    
+    
+    public static void addVehicle(String plate, String ownername ,Object permit )
+    {
+		String permitString = (String)permit;
+		DBConnections.addVehicle(plate,ownername,permitString);
+		
+	}
 }
 
 
