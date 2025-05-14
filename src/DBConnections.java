@@ -118,8 +118,35 @@ public class DBConnections
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
     }
-    public static String addVehicle(String plate,String ownername,String permit){
-		return "trex";
+    public static void addVehicle(String plate,String ownername,String permit){
+		System.out.println("start");
+		try{
+			Statement statement = connection.createStatement();
+			//int rs = statement.executeUpdate("ALTER TABLE Vehicle drop column owner_lname;");
+			ResultSet rs = statement.executeQuery("SELECT * FROM Vehicle;");
+			if (connection == null) {
+        System.err.println("Error: Database connection is null. Cannot add vehicle.");
+        return; // Exit the method
+    }
+
+			while(rs.next()){
+				int value = rs.getInt(1);
+				System.out.println(value);
+			}
+			System.out.println("stop");
+			PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO Vehicle(vehicle_id,plate_number,owner_fname,user_id,permit_id,entry_log_id) VALUES(?,?,?,?,?,?)");
+			preparedStatement.setInt(1,1);//vehicle_id
+			preparedStatement.setString(2,plate);//plate_id
+			preparedStatement.setString(3,ownername);
+			preparedStatement.setInt(4,1);//user_id
+			preparedStatement.setInt(5,1);//permit_id
+			preparedStatement.setInt(6,1);//entry_log_id
+			
+			// Execute all
+			preparedStatement.executeUpdate();
+		} catch(SQLException s){
+			System.out.println(s);
+		}
 	}
 
 }
