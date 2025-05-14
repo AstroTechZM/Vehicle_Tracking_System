@@ -50,7 +50,7 @@ public class DBConnections
             preparedStatement.setTimestamp(5,timestamp); 
             preparedStatement.setInt(6, failedLogInAttempts); // 3rd placeholder (L_name)
             preparedStatement.setBoolean(7, Account_locked);         // 3rd placeholder (L_name)
-            preparedStatement.setString(8, password);
+            preparedStatement.setString(8, hashPassword(password));
 
             // Execute the INSERT statement
             int rowsAffected = preparedStatement.executeUpdate();
@@ -81,7 +81,7 @@ public class DBConnections
 					String cpassword = rs.getString("password");
 					//String name = rs.getString("username");
 					System.out.println("ID: " + cpassword);
-					if(password.equals(cpassword)) return true;
+					if(hashPassword(password).equals(cpassword)) return true;
 					else return false;
 					
 				}
