@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import javax.swing.border.LineBorder;
@@ -66,7 +67,7 @@ public class Dashboard extends JFrame {
         panel.add(sideBarPanel("../lib/vehicle.png", "Vehicle History", vehicleHistoryUI()));
         panel.add(sideBarPanel("../lib/logs1.png", "View Logs", viewLogsUI()));
         panel.add(Box.createVerticalGlue());
-        panel.add(sideBarPanel("../lib/logOut.png", "Log Out", new JPanel())); // Add proper logout panel
+        panel.add(sideBarPanel("../lib/logOut.png", "Log Out", new JPanel())); 
         
         panel.setSize(new Dimension(200, getHeight()));
         return panel;
@@ -119,7 +120,8 @@ public class Dashboard extends JFrame {
         mainContentContainer.repaint();
     }
 
-
+    
+    // Add proper panel methods
     private JPanel vehicleHistoryUI() {
         JPanel panel = new JPanel();
         //panel.add(new JLabel("Vehicle History Content"));
@@ -142,8 +144,6 @@ public class Dashboard extends JFrame {
         // Create a scroll pane and add the table to it
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // Create a frame and add the scroll pane to it
-        JFrame frame = new JFrame("JTable Example");
         panel.add(scrollPane);
 
         return panel;
@@ -179,27 +179,34 @@ public class Dashboard extends JFrame {
 		return panel;
 		
 	}
-    
 	private JPanel regVehicleUI() {
+    
+    BackgroundPanel registrationUI = new BackgroundPanel("../lib/gate2.jpg");
+   // registrationUI.setLayout(new BorderLayout());
 
-    RoundedPanel registrationUI = new RoundedPanel(50);
-    registrationUI.setBorder(BorderFactory.createRaisedBevelBorder());
+    //registrationUI.setBorder(BorderFactory.createRaisedBevelBorder());
+
+
+    RoundedPanel login = new RoundedPanel(10);
+    login.setBorder(BorderFactory.createRaisedBevelBorder());
     
     // Use GridBagLayout for precise control
-    registrationUI.setLayout(new GridBagLayout());
+    login.setSize(new Dimension(200,300));
+    login.setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(5, 5, 5, 5); // Padding
+    gbc.insets = new Insets(8, 8, 8, 8); // Padding
     gbc.anchor = GridBagConstraints.WEST;
     gbc.fill = GridBagConstraints.HORIZONTAL;
 
+
     // Header
     JLabel registerVehicleLabel = new JLabel("Register Vehicle");
-    registerVehicleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    registerVehicleLabel.setFont(new Font("Arial", Font.BOLD, 20));
     registerVehicleLabel.setForeground(new Color(73, 88, 181));
     gbc.gridwidth = 2;
     gbc.gridx = 0;
     gbc.gridy = 0;
-    registrationUI.add(registerVehicleLabel, gbc);
+    login.add(registerVehicleLabel, gbc);
 
     // Form fields
     gbc.gridwidth = 1;
@@ -207,32 +214,32 @@ public class Dashboard extends JFrame {
     // License Plate
     gbc.gridy++;
     JLabel licencePlateLabel = new JLabel("License Plate:");
-    registrationUI.add(licencePlateLabel, gbc);
+    login.add(licencePlateLabel, gbc);
 
     gbc.gridx = 1;
     JTextField licencePlateTextField = new JTextField(15);
-    registrationUI.add(licencePlateTextField, gbc);
+    login.add(licencePlateTextField, gbc);
     gbc.gridx = 0;
 
     // Owner's Name
     gbc.gridy++;
     JLabel ownerNameLabel = new JLabel("Owner's Name:");
-    registrationUI.add(ownerNameLabel, gbc);
+    login.add(ownerNameLabel, gbc);
 
     gbc.gridx = 1;
     JTextField ownerNameTextField = new JTextField(15);
-    registrationUI.add(ownerNameTextField, gbc);
+    login.add(ownerNameTextField, gbc);
     gbc.gridx = 0;
 
     // Permit Type
     gbc.gridy++;
     JLabel permitTypeLabel = new JLabel("Permit Type:");
-    registrationUI.add(permitTypeLabel, gbc);
+    login.add(permitTypeLabel, gbc);
 
     gbc.gridx = 1;
     String[] permitTypes = {"Visitor", "Staff", "Student"};
     JComboBox<String> permitTypeComboBox = new JComboBox<>(permitTypes);
-    registrationUI.add(permitTypeComboBox, gbc);
+    login.add(permitTypeComboBox, gbc);
     gbc.gridx = 0;
 
     // Button
@@ -243,17 +250,106 @@ public class Dashboard extends JFrame {
     RoundedButton addVehicleButton = new RoundedButton("Check In", 20, new Color(73, 88, 181), new Color(59, 89, 182));
     addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
     addVehicleButton.setPreferredSize(new Dimension(200, 40));
-    registrationUI.add(addVehicleButton, gbc);
+    login.add(addVehicleButton, gbc);
+
+    
+   // adding login in panel to registerUI panel
+    registrationUI.add(login);
+
+    // login.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+    // login.setAlignmentY(JPanel.CENTER_ALIGNMENT);
+    //setting the borderlayout
+    //registrationUI.add(login, BorderLayout.CENTER);
 
     return registrationUI;
 }
-    private JPanel viewLogsUI() {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("View Logs Content"));
-        return panel;
+// BackgroundPanel class
+class BackgroundPanel extends JPanel {
+    private ImageIcon backgroundImage;
+
+    public BackgroundPanel(String imagePath) {
+        backgroundImage = new ImageIcon(imagePath);
     }
 
-       private JPanel bottom()
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(backgroundImage.getImage(), 0, 0, getWidth(), getHeight(), null);
+    }
+}
+    public JPanel logout() {
+
+        JPanel panel = new JPanel();
+        
+        //Creating an instance of login window
+         LoginWindow loginWindow = new LoginWindow();
+         Dashboard dashboard = new Dashboard();
+
+        // Diolog box 
+        int response = JOptionPane.showConfirmDialog(panel, "Are you sure you want to log out?", "Logout Confirmation", JOptionPane.YES_NO_OPTION);
+
+        if (response == JOptionPane.YES_OPTION) {
+            // Add logout logic here
+           //dashboard.setVisible(false); 
+           
+           JOptionPane.showMessageDialog(panel, "Loged Out Succesfull");
+
+           //loginWindow.setVisible(true);
+
+        } else {
+
+            //dashboard.setVisible(true);
+            JOptionPane.showMessageDialog(panel, "Loged Out Succesfull");   
+        }
+
+        return panel;
+  }
+    private JPanel viewLogsUI() {
+        JPanel panel = new JPanel();
+    
+        DefaultTableModel model = new DefaultTableModel();
+        
+            model.addColumn("VIHECLE ID");
+            model.addColumn("PLATE ID");
+            model.addColumn("OWENER NAME");
+            model.addColumn("PERMIT ID");
+            model.addColumn("PERMIT TYPE");
+            model.addColumn("TIME IN");
+            model.addColumn("TIME OUT");
+            model.addColumn("USER ID");
+
+            model.addRow(new Object[]{"John Doe", 30});
+            model.addRow(new Object[]{"Jane Doe", 25});
+
+            // Create a JTable with the table model
+            JTable table = new JTable(model);
+            //table.setCaption("VIHECLE HISTORY");
+
+            // Create a scroll pane and add the table to it
+            JScrollPane scrollPane = new JScrollPane(table);
+
+            panel.add(scrollPane);
+
+
+            //Creating Table two
+            DefaultTableModel model1 = new DefaultTableModel();
+            model1.addColumn("LOG ID");
+            model1.addColumn("TIME STAMP");
+            model1.addColumn("AUDIT ID");
+            model1.addColumn("USER ID");
+
+            JTable table1 = new JTable(model1);
+            //table1.setCaption("ENTRY LOG");
+
+
+            // Create a scroll pane and add the table to it
+            JScrollPane scrollPane1 = new JScrollPane(table1);
+
+            panel.add(scrollPane1);
+
+        return panel;
+    }
+           private JPanel bottom()
     {
         JPanel bottom = new JPanel(new BorderLayout());
 
@@ -267,16 +363,9 @@ public class Dashboard extends JFrame {
 		return bottom;
 
     }
-    
-    
-    public static void addVehicle(String plate, String ownername ,Object permit )
-    {
-		String permitString = (String)permit;
-		DBConnections.addVehicle(plate,ownername,permitString);
-		
-	}
-}
 
+}
+   
 
 class Notification extends JLabel {
     private int notificationCount = 2;
@@ -335,7 +424,5 @@ class Notification extends JLabel {
         g2d.dispose();
         return new ImageIcon(image);
     }
-
-
             
 }
