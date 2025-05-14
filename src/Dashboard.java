@@ -182,16 +182,16 @@ public class Dashboard extends JFrame {
 	private JPanel regVehicleUI() {
     
     BackgroundPanel registrationUI = new BackgroundPanel("../lib/gate2.jpg");
-   // registrationUI.setLayout(new BorderLayout());
+    registrationUI.setLayout(new BorderLayout());
 
-    //registrationUI.setBorder(BorderFactory.createRaisedBevelBorder());
+    registrationUI.setBorder(BorderFactory.createRaisedBevelBorder());
 
 
     RoundedPanel login = new RoundedPanel(10);
     login.setBorder(BorderFactory.createRaisedBevelBorder());
     
     // Use GridBagLayout for precise control
-    login.setSize(new Dimension(200,300));
+    login.setSize(new Dimension(400,350));
     login.setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(8, 8, 8, 8); // Padding
@@ -256,11 +256,60 @@ public class Dashboard extends JFrame {
    // adding login in panel to registerUI panel
     registrationUI.add(login);
 
-    // login.setAlignmentX(JPanel.CENTER_ALIGNMENT);
-    // login.setAlignmentY(JPanel.CENTER_ALIGNMENT);
+    login.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+    login.setAlignmentY(JPanel.CENTER_ALIGNMENT);
     //setting the borderlayout
-    //registrationUI.add(login, BorderLayout.CENTER);
+    // registrationUI.add(login, BorderLayout.CENTER);
+    // registrationUI.add(login, BorderLayout.CENTER);
+    
+    RoundedPanel checkout = new RoundedPanel(10);
+    checkout.setBorder(BorderFactory.createRaisedBevelBorder());
+    
+    // Use GridBagLayout for precise control
+    checkout.setSize(new Dimension(200,300));
+    checkout.setLayout(new GridBagLayout());
+    GridBagConstraints gbg = new GridBagConstraints();
+    gbg.insets = new Insets(8, 8, 8, 8); // Padding
+    gbg.anchor = GridBagConstraints.WEST;
+    gbg.fill = GridBagConstraints.HORIZONTAL;
 
+
+    // Header
+    JLabel registerVehicle1Label = new JLabel("Check-Out Vehicle");
+    registerVehicle1Label.setFont(new Font("Arial", Font.BOLD, 20));
+    registerVehicle1Label.setForeground(new Color(73, 88, 181));
+    gbg.gridwidth = 2;
+    gbg.gridx = 0;
+    gbg.gridy = 0;
+    checkout.add(registerVehicle1Label, gbg);
+
+
+    // Form fields
+    gbg.gridwidth = 1;
+    
+    // License Plate
+    gbg.gridy++;
+    JLabel licencePlate1Label = new JLabel("License Plate:");
+    checkout.add(licencePlate1Label, gbg);
+    
+    gbg.gridx = 1;
+    JTextField licencePlate1TextField = new JTextField(15);
+    checkout.add(licencePlate1TextField, gbg);
+    gbg.gridx = 0;
+
+
+
+    // Button
+    gbg.gridy++;
+    gbg.gridwidth = 2;
+    gbg.fill = GridBagConstraints.NONE;
+    gbg.anchor = GridBagConstraints.CENTER;
+    RoundedButton addVehicleButton1 = new RoundedButton("Check Out", 20, new Color(73, 88, 181), new Color(59, 89, 182));
+    addVehicleButton1.setPreferredSize(new Dimension(200, 40));
+    checkout.add(addVehicleButton1, gbg);
+
+    registrationUI.add(checkout);
+    registrationUI.add(checkout, BorderLayout.SOUTH);
     return registrationUI;
 }
 // BackgroundPanel class
