@@ -13,7 +13,7 @@ import javax.swing.*;
  * 
  * 
  */
-public class VehicleTracker {
+public class Main {
 
     public static void main(String[] args) {
 			String url =  "jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19553/defaultdb?" +
