@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.border.LineBorder;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
-import javax.swing.table.*;
+//import javax.swing.table.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
@@ -363,9 +363,10 @@ class BackgroundPanel extends JPanel {
 		return bottom;
 
     }
+    public void addVehicle(String licencePlateTextField, String ownerNameTextField, Object permitTypeComboBox) {
 
-}
-   
+    }
+}  
 
 class Notification extends JLabel {
     private int notificationCount = 2;
