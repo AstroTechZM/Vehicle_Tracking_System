@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 public class DBConnections
 {
 	static Connection connection = null;
-	
+
 	public DBConnections(Connection conn)
 		{
 			this.connection = conn;
