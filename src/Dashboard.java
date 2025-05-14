@@ -364,7 +364,8 @@ class BackgroundPanel extends JPanel {
 
     }
     public void addVehicle(String licencePlateTextField, String ownerNameTextField, Object permitTypeComboBox) {
-
+        String permit = (String)permitTypeComboBox;
+        DBConnections.addVehicle(licencePlateTextField, ownerNameTextField, permit);
     }
 }  
 
