@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import javax.swing.table.DefaultTableModel;
 
 public class DBConnections
 {
@@ -209,22 +210,97 @@ private static void handleDatabaseError(SQLException e) {
         }
         return "error";
     }
+    
+    
+  
+
+
+
+    /**
+     * Fetches all rows from the 'logs' table and returns them
+     * as a DefaultTableModel ready to plug into a JTable.
+     */
+    public static DefaultTableModel fetchLogsTableModel() {
+        String[] columnNames = {
+            "LOG ID", "PLATE NUMBER", "OWNER NAME",
+            "USER ID", "TIME STAMP", "IP ADDRESS", "ACTION"
+        };
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+
+        String sql = "SELECT log_id, plate_number, owner_fname, user_id, time_stamp, ip_address, action "
+                   + "FROM logs ORDER BY time_stamp DESC";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[columnNames.length];
+                row[0] = rs.getInt("log_id");
+                row[1] = rs.getString("plate_number");
+                row[2] = rs.getString("owner_fname");
+                row[3] = rs.getInt("user_id");
+                row[4] = rs.getTimestamp("time_stamp");
+                row[5] = rs.getString("ip_address");
+                row[6] = rs.getString("action");
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // you might want to return an empty model on error
+        }
+
+        return model;
+    }
+    public static DefaultTableModel fetchVehicleHistoryModel() {
+        // adjust column names to match your DB schema
+        //log_id | plate_number | owner_fname | user_id | time_stamp          | ip_address    | action  
+        String[] cols = {
+            "plate_number",
+            "owner_fname",
+            "user_id"
+        };
+        DefaultTableModel model = new DefaultTableModel(cols, 0);
+
+        String sql = "SELECT plate_number, owner_fname, user_id"
+                   + " FROM logs";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[cols.length];
+                //row[0] = rs.getInt("vehicle_id");
+                row[0] = rs.getString("plate_number");
+                row[1] = rs.getString("owner_fname");
+                row[2] = rs.getInt("user_id");
+                //row[4] = rs.getInt("permit_id");
+                //row[5] = rs.getString("permit_type");
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
 }
+
+
 class Connect
 {
 	public Connection conn(){
 		Connection connection= null;
 		try
 		{
-			/*connection = DriverManager.getConnection("jdbc:mysql://mysql-1974e506-mu-system1.j.aivencloud.com:19549/defaultdb?" +
+			connection = DriverManager.getConnection("jdbc:mysql://my-sql-mu-system1.d.aivencloud.com:19549/defaultdb?" +
              "ssl=true" +
              "&sslmode=require" +
              "&sslrootcert=../lib/ca.pem",
               "avnadmin", 
-              "AVNS_Osn2GIElcOxqkzrLhEW");*/
-			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/MU_DB",
+              "AVNS_MO_JeellTaHHdiu0U7v");
+			/*connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/MU_DB",
               "root", 
-              "drexastro");
+              "drexastro");*/
               
               return connection;
 		} catch(SQLException e)

@@ -122,7 +122,7 @@ public class Dashboard extends JFrame {
 
     
     // Add proper panel methods
-    private JPanel vehicleHistoryUI() {
+    /*private JPanel vehicleHistoryUI() {
         JPanel panel = new JPanel();
         //panel.add(new JLabel("Vehicle History Content"));
 
@@ -147,7 +147,22 @@ public class Dashboard extends JFrame {
         panel.add(scrollPane);
 
         return panel;
-    }
+    }*/
+    private JPanel vehicleHistoryUI() {
+    JPanel panel = new JPanel(new BorderLayout());
+
+    // 1) Ask DBConnections for a fresh DefaultTableModel
+    DefaultTableModel model = DBConnections.fetchVehicleHistoryModel();
+
+    // 2) Create the JTable & wrap in a scroll pane
+    JTable table = new JTable(model);
+    JScrollPane scroll = new JScrollPane(table);
+    scroll.setBorder(BorderFactory.createTitledBorder("Vehicle History"));
+
+    panel.add(scroll, BorderLayout.CENTER);
+    return panel;
+}
+
 	public JPanel menuBar()
 	{
 		ImageIcon img = new ImageIcon("../lib/MULogo.jpeg");
@@ -353,51 +368,28 @@ class BackgroundPanel extends JPanel {
 
         return panel;
   }
+
     private JPanel viewLogsUI() {
-        JPanel panel = new JPanel();
+    JPanel panel = new JPanel(new BorderLayout());
+
+    // 1) Fetch fresh model
+    DefaultTableModel logsModel = DBConnections.fetchLogsTableModel();
+
+    // 2) Build the first table
+    JTable table = new JTable(logsModel);
+    JScrollPane scrollPane = new JScrollPane(table);
+    scrollPane.setBorder(BorderFactory.createTitledBorder("Vehicle Logs"));
+    panel.add(scrollPane, BorderLayout.CENTER);
+
+    // (If you still need the second table, you can leave it below
+    //  or remove it if it’s unused.)
+    // …
+    return panel;
+}
+
     
-        DefaultTableModel model = new DefaultTableModel();
-        
-            model.addColumn("VIHECLE ID");
-            model.addColumn("PLATE ID");
-            model.addColumn("OWENER NAME");
-            model.addColumn("PERMIT ID");
-            model.addColumn("PERMIT TYPE");
-            model.addColumn("TIME IN");
-            model.addColumn("TIME OUT");
-            model.addColumn("USER ID");
-
-            model.addRow(new Object[]{"John Doe", 30});
-            model.addRow(new Object[]{"Jane Doe", 25});
-
-            // Create a JTable with the table model
-            JTable table = new JTable(model);
-            //table.setCaption("VIHECLE HISTORY");
-
-            // Create a scroll pane and add the table to it
-            JScrollPane scrollPane = new JScrollPane(table);
-
-            panel.add(scrollPane);
-
-
-            //Creating Table two
-            DefaultTableModel model1 = new DefaultTableModel();
-            model1.addColumn("LOG ID");
-            model1.addColumn("TIME STAMP");
-            model1.addColumn("AUDIT ID");
-            model1.addColumn("USER ID");
-
-            JTable table1 = new JTable(model1);
-            //table1.setCaption("ENTRY LOG");
-
-
-            // Create a scroll pane and add the table to it
-            JScrollPane scrollPane1 = new JScrollPane(table1);
-
-            panel.add(scrollPane1);
-
-        return panel;
-    }
+    
+    
            private JPanel bottom()
     {
         JPanel bottom = new JPanel(new BorderLayout());
