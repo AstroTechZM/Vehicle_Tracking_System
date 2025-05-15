@@ -53,6 +53,7 @@ public class Dashboard extends JFrame {
     }
 
     private JPanel sideBar() {
+		
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
@@ -67,6 +68,7 @@ public class Dashboard extends JFrame {
         panel.setSize(new Dimension(200, getHeight()));
         return panel;
     }
+    
 
     private JPanel sideBarPanel(String path, String text, JPanel targetPanel) {
         JPanel panel = new JPanel(new BorderLayout());
@@ -116,8 +118,7 @@ public class Dashboard extends JFrame {
     }
 
     
-    // Add proper panel methods
- 
+
     private JPanel vehicleHistoryUI() {
     JPanel panel = new JPanel(new BorderLayout());
 
@@ -176,11 +177,11 @@ public class Dashboard extends JFrame {
     login.setBorder(BorderFactory.createRaisedBevelBorder());
     
     // Use GridBagLayout for precise control
-    login.setSize(new Dimension(400,350));
+    login.setSize(new Dimension(1500,605));
     login.setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(8, 8, 8, 8); // Padding
-    gbc.anchor = GridBagConstraints.WEST;
+    gbc.anchor = GridBagConstraints.CENTER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
 
 
@@ -202,17 +203,17 @@ public class Dashboard extends JFrame {
     login.add(licencePlateLabel, gbc);
 
     gbc.gridx = 1;
-    licencePlateTextField = new JTextField(15);
+    JTextField licencePlateTextField = new JTextField(35);
     login.add(licencePlateTextField, gbc);
     gbc.gridx = 0;
 
-    // Owner's Name
+    // Owner's ID
     gbc.gridy++;
-    JLabel ownerNameLabel = new JLabel("Owner's Name:");
+    JLabel ownerNameLabel = new JLabel(" Owner's ID:");
     login.add(ownerNameLabel, gbc);
 
     gbc.gridx = 1;
-    ownerNameTextField = new JTextField(15);
+    JTextField ownerNameTextField = new JTextField(35);
     login.add(ownerNameTextField, gbc);
     gbc.gridx = 0;
 
@@ -232,9 +233,9 @@ public class Dashboard extends JFrame {
     gbc.gridwidth = 2;
     gbc.fill = GridBagConstraints.NONE;
     gbc.anchor = GridBagConstraints.CENTER;
-    RoundedButton addVehicleButton = new RoundedButton("Check In", 20, new Color(73, 88, 181), new Color(59, 89, 182));
+    RoundedButton addVehicleButton = new RoundedButton("Check In", 10, new Color(73, 88, 181), new Color(59, 89, 182));
     addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
-    addVehicleButton.setPreferredSize(new Dimension(200, 40));
+    addVehicleButton.setPreferredSize(new Dimension(150, 40));
     login.add(addVehicleButton, gbc);
 
     
@@ -247,15 +248,15 @@ public class Dashboard extends JFrame {
     // registrationUI.add(login, BorderLayout.CENTER);
     // registrationUI.add(login, BorderLayout.CENTER);
     
-    RoundedPanel checkout = new RoundedPanel(10);
+    RoundedPanel checkout = new RoundedPanel(20);
     checkout.setBorder(BorderFactory.createRaisedBevelBorder());
     
     // Use GridBagLayout for precise control
-    checkout.setSize(new Dimension(200,300));
+    checkout.setSize(new Dimension(200,50));
     checkout.setLayout(new GridBagLayout());
     GridBagConstraints gbg = new GridBagConstraints();
     gbg.insets = new Insets(8, 8, 8, 8); // Padding
-    gbg.anchor = GridBagConstraints.WEST;
+    gbg.anchor = GridBagConstraints.CENTER;
     gbg.fill = GridBagConstraints.HORIZONTAL;
 
 
@@ -289,9 +290,10 @@ public class Dashboard extends JFrame {
     gbg.gridwidth = 2;
     gbg.fill = GridBagConstraints.NONE;
     gbg.anchor = GridBagConstraints.CENTER;
-    RoundedButton addVehicleButton1 = new RoundedButton("Check Out", 20, new Color(73, 88, 181), new Color(59, 89, 182));
-    addVehicleButton1.setPreferredSize(new Dimension(200, 40));
+    RoundedButton addVehicleButton1 = new RoundedButton("Check Out", 10, new Color(73, 88, 181), new Color(59, 89, 182));
+    addVehicleButton1.setPreferredSize(new Dimension(150, 40));
     checkout.add(addVehicleButton1, gbg);
+    
 
     registrationUI.add(checkout);
     registrationUI.add(checkout, BorderLayout.SOUTH);
@@ -356,8 +358,11 @@ class BackgroundPanel extends JPanel {
     // …
     return panel;
 }
+
     
-    private JPanel bottom()
+    
+    
+           private JPanel bottom()
     {
         JPanel bottom = new JPanel(new BorderLayout());
 
@@ -374,11 +379,6 @@ class BackgroundPanel extends JPanel {
     public void addVehicle(String licencePlateTextField, String ownerNameTextField, Object permitTypeComboBox) {
         String permit = (String)permitTypeComboBox;
         DBConnections.addVehicle(licencePlateTextField, ownerNameTextField, permit);
-
-        JOptionPane.showMessageDialog(null, 
-                    "Vehicle CheckedIn Suceesfull");
-            this.licencePlateTextField.setText("");
-            this.ownerNameTextField.setText("");
     }
 }  
 
