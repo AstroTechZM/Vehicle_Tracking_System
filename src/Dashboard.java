@@ -130,6 +130,61 @@ public class Dashboard extends JFrame {
     scroll.setBorder(BorderFactory.createTitledBorder("Vehicle History"));
 
     panel.add(scroll, BorderLayout.CENTER);
+
+// search button on logs
+    RoundedPanel search = new RoundedPanel(10);
+    search.setBorder(BorderFactory.createRaisedBevelBorder());
+    
+    // Use GridBagLayout for precise control
+    search.setSize(new Dimension(200,300));
+    search.setLayout(new FlowLayout());
+    // GridBagConstraints gbs = new GridBagConstraints();
+    // gbs.insets = new Insets(8, 8, 8, 8); // Padding
+    // gbs.anchor = GridBagConstraints.WEST;
+    // gbs.fill = GridBagConstraints.HORIZONTAL;
+
+
+    // Form fields
+    //gbs.gridwidth = 1;
+    
+    // License Plate
+    //gbs.gridy++;
+    //JLabel searchLabel = new JLabel("Plate NO:");
+    //search.add(searchLabel);
+    
+    //gbs.gridx = 1;
+    JTextField searchTextField = new JTextField(15);
+    searchTextField.setText("PLate NO");
+    search.add(searchTextField);
+    //gbs.gridx = 0;
+
+
+    // search Button
+    //gbs.gridy++;
+    //gbs.gridwidth = 2;
+   // gbs.fill = GridBagConstraints.NONE;
+    //gbs.anchor = GridBagConstraints.CENTER;
+    RoundedButton searchButton = new RoundedButton("search", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+    //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+    searchButton.setPreferredSize(new Dimension(100, 20));
+    search.add(searchButton);
+
+
+
+
+    panel.add(search, BorderLayout.NORTH);
+  
+
+
+
+
+
+
+
+
+
+
+
     return panel;
 }
 

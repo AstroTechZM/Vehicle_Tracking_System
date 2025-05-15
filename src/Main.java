@@ -26,10 +26,10 @@ public class Main {
         // Use SwingUtilities.invokeLater to ensure thread safety
         SwingUtilities.invokeLater(() -> {
             // Create and show the login window
-            LoginWindow loginWindow = new LoginWindow();
-            loginWindow.setVisible(true);
-            //Dashboard dashboard = new Dashboard();
-            //dashboard.setVisible(true);
+            //LoginWindow loginWindow = new LoginWindow();
+            //loginWindow.setVisible(true);
+            Dashboard dashboard = new Dashboard();
+            dashboard.setVisible(true);
             
         });
     }
