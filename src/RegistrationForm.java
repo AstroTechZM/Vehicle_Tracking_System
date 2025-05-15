@@ -153,5 +153,13 @@ public class RegistrationForm {
         String passwords = new String(passwordChars); // Convert to String if needed
 			DBConnections.createAccount(firstName.getText(),lastName.getText(),role.getText(),passwords);
 
+            JOptionPane.showMessageDialog(null, 
+                    "User Registered Suceesfull");
+
+
+            firstName.setText("");
+            lastName.setText("");
+            role.setText("");
+            password.setText("");
 	}
 }

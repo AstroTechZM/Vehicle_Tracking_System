@@ -117,32 +117,7 @@ public class Dashboard extends JFrame {
 
     
     // Add proper panel methods
-    /*private JPanel vehicleHistoryUI() {
-        JPanel panel = new JPanel();
-        //panel.add(new JLabel("Vehicle History Content"));
-
-        DefaultTableModel model = new DefaultTableModel();
-        
-        model.addColumn("VIHECLE ID");
-        model.addColumn("PLATE ID");
-        model.addColumn("OWENER NAME");
-        model.addColumn("USER ID");
-        model.addColumn("PERMIT ID");
-        model.addColumn("PERMIT ID");
-
-        model.addRow(new Object[]{"John Doe", 30});
-        model.addRow(new Object[]{"Jane Doe", 25});
-
-        // Create a JTable with the table model
-        JTable table = new JTable(model);
-
-        // Create a scroll pane and add the table to it
-        JScrollPane scrollPane = new JScrollPane(table);
-
-        panel.add(scrollPane);
-
-        return panel;
-    }*/
+ 
     private JPanel vehicleHistoryUI() {
     JPanel panel = new JPanel(new BorderLayout());
 
@@ -227,7 +202,7 @@ public class Dashboard extends JFrame {
     login.add(licencePlateLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField licencePlateTextField = new JTextField(15);
+    licencePlateTextField = new JTextField(15);
     login.add(licencePlateTextField, gbc);
     gbc.gridx = 0;
 
@@ -237,7 +212,7 @@ public class Dashboard extends JFrame {
     login.add(ownerNameLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField ownerNameTextField = new JTextField(15);
+    ownerNameTextField = new JTextField(15);
     login.add(ownerNameTextField, gbc);
     gbc.gridx = 0;
 
@@ -381,11 +356,8 @@ class BackgroundPanel extends JPanel {
     // …
     return panel;
 }
-
     
-    
-    
-           private JPanel bottom()
+    private JPanel bottom()
     {
         JPanel bottom = new JPanel(new BorderLayout());
 
@@ -402,6 +374,11 @@ class BackgroundPanel extends JPanel {
     public void addVehicle(String licencePlateTextField, String ownerNameTextField, Object permitTypeComboBox) {
         String permit = (String)permitTypeComboBox;
         DBConnections.addVehicle(licencePlateTextField, ownerNameTextField, permit);
+
+        JOptionPane.showMessageDialog(null, 
+                    "Vehicle CheckedIn Suceesfull");
+            this.licencePlateTextField.setText("");
+            this.ownerNameTextField.setText("");
     }
 }  
 
