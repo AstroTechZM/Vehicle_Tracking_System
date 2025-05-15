@@ -1,12 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import javax.swing.border.LineBorder;
 import java.awt.event.*;
-import java.awt.geom.RoundRectangle2D;
-//import javax.swing.table.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
