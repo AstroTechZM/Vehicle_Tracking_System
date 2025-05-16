@@ -1,104 +1,62 @@
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Test extends JLabel {
-    private int notificationCount = 0;
-    private ImageIcon originalIcon;
-    private static final int ICON_SIZE = 48;
-
-    public Test() {
-        try {
-            // Load icon from file
-            File iconFile = new File("../lib/notificationIcon.png");
-            BufferedImage originalImage = ImageIO.read(iconFile);
-            originalIcon = new ImageIcon(originalImage);
-        } catch (IOException | IllegalArgumentException e) {
-            System.err.println("Error loading icon: " + e.getMessage());
-        }
-        setIcon(createCompositeIcon());
-    }
-
-    public void setNotificationCount(int count) {
-        this.notificationCount = Math.max(0, count);
-        setIcon(createCompositeIcon());
-    }
-
-    private ImageIcon createCompositeIcon() {
-        BufferedImage image = new BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Draw base icon
-        Image scaledIcon = originalIcon.getImage().getScaledInstance(
-            ICON_SIZE, ICON_SIZE, Image.SCALE_SMOOTH);
-        g2d.drawImage(scaledIcon, 0, 0, null);
-
-        // Draw notification badge
-        if (notificationCount > 0) {
-            int badgeSize = 20;
-            int badgeX = ICON_SIZE - badgeSize;
-            int badgeY = 0;
-
-            // Red circle background
-            g2d.setColor(new Color(255, 59, 48)); // iOS-style red
-            g2d.fillOval(badgeX, badgeY, badgeSize, badgeSize);
-
-            // White text
-            g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.BOLD, 12));
-            
-            String countText = notificationCount > 99 ? "99+" : String.valueOf(notificationCount);
-            FontMetrics fm = g2d.getFontMetrics();
-            int textX = badgeX + (badgeSize - fm.stringWidth(countText)) / 2;
-            int textY = badgeY + (badgeSize - fm.getHeight()) / 2 + fm.getAscent();
-            
-            g2d.drawString(countText, textX, textY);
-        }
-
-        g2d.dispose();
-        return new ImageIcon(image);
-    }
-
-
+public class Test {
+    private static final Map<Integer, Color> rowColors = new HashMap<>();
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Notification Icon Demo");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        // Create table model with sample data
+        DefaultTableModel model = new DefaultTableModel(
+            new Object[]{"Name", "Age", "Occupation"}, 0);
+        model.addRow(new Object[]{"John", 30, "Developer"});
+        model.addRow(new Object[]{"Alice", 25, "Designer"});
+        model.addRow(new Object[]{"Bob", 40, "Manager"});
 
-            Test notificationIcon = new Test();
-            
-            JPanel controlPanel = new JPanel();
-            controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-            controlPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        // Create a custom JTable that highlights rows
+        JTable table = new JTable(model) {
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+                
+                // Check if this row has a custom color
+                if (rowColors.containsKey(row)) {
+                    c.setBackground(rowColors.get(row));
+                } else {
+                    c.setBackground(getBackground());
+                }
+                return c;
+            }
+        };
 
-            JButton addButton = new JButton("Add Notification");
-            JButton clearButton = new JButton("Clear Notifications");
+        // Add table to a scroll pane and frame
+        JFrame frame = new JFrame("Row Highlight Example");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(new JScrollPane(table));
+        frame.pack();
+        frame.setVisible(true);
 
-            addButton.addActionListener(e -> 
-                notificationIcon.setNotificationCount(notificationIcon.notificationCount + 1)
-            );
+        // Example: Highlight row 1 (Alice) in yellow
+        highlightRow(table, 1, Color.YELLOW);
 
-            clearButton.addActionListener(e -> 
-                notificationIcon.setNotificationCount(0)
-            );
+        // Example: Highlight row 2 (Bob) in light green
+        highlightRow(table, 2, new Color(200, 255, 200));
+    }
 
-            controlPanel.add(addButton);
-            controlPanel.add(Box.createVerticalStrut(10));
-            controlPanel.add(clearButton);
-
-            frame.add(notificationIcon);
-            frame.add(controlPanel);
-            
-            frame.pack();
-            frame.setSize(300, 200);
-            frame.setVisible(true);
-        });
+    /**
+     * Changes the background color of a specific row in a JTable.
+     * @param table The JTable to modify.
+     * @param row The row index (0-based).
+     * @param color The color to apply.
+     */
+    public static void highlightRow(JTable table, int row, Color color) {
+        if (row < 0 || row >= table.getRowCount()) {
+            throw new IllegalArgumentException("Invalid row index: " + row);
+        }
+        rowColors.put(row, color); // Store the color for this row
+        table.repaint(); // Force a repaint to apply changes
     }
 }

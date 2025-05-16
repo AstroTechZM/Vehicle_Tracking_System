@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 public class Dashboard extends JFrame {
     // Add main content container reference
@@ -56,19 +57,55 @@ public class Dashboard extends JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
+
         
-        panel.add(sideBarPanel("../lib/homy.png", "Home", HomePage.home()));
-        panel.add(sideBarPanel("../lib/register.png", "Register Vehicle", regVehicleUI()));
-        panel.add(sideBarPanel("../lib/vehicle.png", "Vehicle History", vehicleHistoryUI()));
-        panel.add(sideBarPanel("../lib/logs1.png", "View Logs", viewLogsUI()));
-        panel.add(Box.createVerticalGlue());
-        panel.add(sideBarPanel("../lib/logOut.png", "Log Out", new JPanel())); 
+        panel.add(sideBarPanel("../lib/homy.png", "Home", () -> HomePage.home()));
+		panel.add(sideBarPanel("../lib/register.png", "Register Vehicle", () -> regVehicleUI()));
+		panel.add(sideBarPanel("../lib/vehicle.png", "Vehicle History", () -> vehicleHistoryUI()));
+		panel.add(sideBarPanel("../lib/logs1.png", "View Logs", () -> viewLogsUI()));
+		panel.add(Box.createVerticalGlue());
+        panel.add(sideLogOutPanel("../lib/logOut.png", "Log Out")); 
+
         
         panel.setSize(new Dimension(200, getHeight()));
         return panel;
     }
 
-    private JPanel sideBarPanel(String path, String text, JPanel targetPanel) {
+    private JPanel sideBarPanel(String iconPath, String text, Supplier<JPanel> panelSupplier) {
+        JPanel item = new JPanel(new BorderLayout());
+        item.setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
+
+        // Icon
+        ImageIcon icon = new ImageIcon(iconPath);
+        Image img = icon.getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+        item.add(new JLabel(new ImageIcon(img)), BorderLayout.WEST);
+
+        // Label
+        JLabel label = new JLabel(text);
+        label.setBorder(new EmptyBorder(0, 10, 0, 10));
+        item.add(label, BorderLayout.CENTER);
+
+        item.setOpaque(false);
+        item.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        item.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                switchContent(panelSupplier.get());
+            }
+            @Override public void mouseEntered(MouseEvent e) {
+                item.setBackground(new Color(240,240,240));
+                item.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+            @Override public void mouseExited(MouseEvent e) {
+                item.setBackground(null);
+                item.setCursor(Cursor.getDefaultCursor());
+            }
+        });
+
+        return item;
+    }
+private JPanel sideLogOutPanel(String path, String text) {
         JPanel panel = new JPanel(new BorderLayout());
         ImageIcon home = new ImageIcon(path);
 		Image homeImg = home.getImage().getScaledInstance(25,25,Image.SCALE_SMOOTH);
@@ -88,10 +125,11 @@ public class Dashboard extends JFrame {
 		JPanel myPanel = new JPanel();
         
         panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                switchContent(targetPanel);
-            }
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				dispose();
+			}
+
             
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -117,76 +155,32 @@ public class Dashboard extends JFrame {
 
     
     // Add proper panel methods
- 
-    private JPanel vehicleHistoryUI() {
-    JPanel panel = new JPanel(new BorderLayout());
+	private JPanel vehicleHistoryUI() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JTable table = new JTable();
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBorder(BorderFactory.createTitledBorder("Vehicle History"));
+        panel.add(scroll, BorderLayout.CENTER);
 
-    // 1) Ask DBConnections for a fresh DefaultTableModel
-    DefaultTableModel model = DBConnections.fetchVehicleHistoryModel();
+        // Load data in background
+        new SwingWorker<DefaultTableModel, Void>() {
+            @Override
+            protected DefaultTableModel doInBackground() throws Exception {
+                return DBConnections.fetchVehicleHistoryModel();
+            }
+            @Override
+            protected void done() {
+                try {
+                    table.setModel(get());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(panel, "Error loading vehicle history: " + ex.getMessage());
+                }
+            }
+        }.execute();
 
-    // 2) Create the JTable & wrap in a scroll pane
-    JTable table = new JTable(model);
-    JScrollPane scroll = new JScrollPane(table);
-    scroll.setBorder(BorderFactory.createTitledBorder("Vehicle History"));
-
-    panel.add(scroll, BorderLayout.CENTER);
-
-// search button on logs
-    RoundedPanel search = new RoundedPanel(10);
-    search.setBorder(BorderFactory.createRaisedBevelBorder());
-    
-    // Use GridBagLayout for precise control
-    search.setSize(new Dimension(200,300));
-    search.setLayout(new FlowLayout());
-    // GridBagConstraints gbs = new GridBagConstraints();
-    // gbs.insets = new Insets(8, 8, 8, 8); // Padding
-    // gbs.anchor = GridBagConstraints.WEST;
-    // gbs.fill = GridBagConstraints.HORIZONTAL;
-
-
-    // Form fields
-    //gbs.gridwidth = 1;
-    
-    // License Plate
-    //gbs.gridy++;
-    //JLabel searchLabel = new JLabel("Plate NO:");
-    //search.add(searchLabel);
-    
-    //gbs.gridx = 1;
-    JTextField searchTextField = new JTextField(15);
-    searchTextField.setText("PLate NO");
-    search.add(searchTextField);
-    //gbs.gridx = 0;
-
-
-    // search Button
-    //gbs.gridy++;
-    //gbs.gridwidth = 2;
-   // gbs.fill = GridBagConstraints.NONE;
-    //gbs.anchor = GridBagConstraints.CENTER;
-    RoundedButton searchButton = new RoundedButton("search", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-    //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
-    searchButton.setPreferredSize(new Dimension(100, 20));
-    search.add(searchButton);
-
-
-
-
-    panel.add(search, BorderLayout.NORTH);
-  
-
-
-
-
-
-
-
-
-
-
-
-    return panel;
-}
+        return panel;
+    }
 
 	public JPanel menuBar()
 	{
@@ -394,23 +388,32 @@ class BackgroundPanel extends JPanel {
         return panel;
   }
 
-    private JPanel viewLogsUI() {
-    JPanel panel = new JPanel(new BorderLayout());
+private JPanel viewLogsUI() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JTable table = new JTable();
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBorder(BorderFactory.createTitledBorder("System Logs"));
+        panel.add(scroll, BorderLayout.CENTER);
 
-    // 1) Fetch fresh model
-    DefaultTableModel logsModel = DBConnections.fetchLogsTableModel();
+        // Load data in background
+        new SwingWorker<DefaultTableModel, Void>() {
+            @Override
+            protected DefaultTableModel doInBackground() throws Exception {
+                return DBConnections.fetchLogsTableModel();
+            }
+            @Override
+            protected void done() {
+                try {
+                    table.setModel(get());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(panel, "Error loading logs: " + ex.getMessage());
+                }
+            }
+        }.execute();
 
-    // 2) Build the first table
-    JTable table = new JTable(logsModel);
-    JScrollPane scrollPane = new JScrollPane(table);
-    scrollPane.setBorder(BorderFactory.createTitledBorder("Vehicle Logs"));
-    panel.add(scrollPane, BorderLayout.CENTER);
-
-    // (If you still need the second table, you can leave it below
-    //  or remove it if it’s unused.)
-    // …
-    return panel;
-}
+        return panel;
+    }
     
     private JPanel bottom()
     {
