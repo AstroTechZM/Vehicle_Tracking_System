@@ -526,13 +526,25 @@ class BackgroundPanel extends JPanel {
 
     // }
     public void addVehicle(String licencePlateTextField, String ownerNameTextField, Object permitTypeComboBox) {
+        
+        if (licencePlateTextField.isBlank()){
+
+            JOptionPane.showMessageDialog(null, "Please Enter Plate No!", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+        else if(ownerNameTextField.isBlank()) {
+
+        JOptionPane.showMessageDialog(null, "Please Enter OwnerName!", "Warning", JOptionPane.WARNING_MESSAGE);
+
+        }
+        else{
         String permit = (String)permitTypeComboBox;
         DBConnections.addVehicle(licencePlateTextField, ownerNameTextField, permit);
 
         JOptionPane.showMessageDialog(null, 
-                    "Vehicle CheckedIn Suceesfull");
-            this.licencePlateTextField.setText("");
-            this.ownerNameTextField.setText("");
+                   "Vehicle CheckedIn Suceesfull");
+           this.licencePlateTextField.setText("");
+           this.ownerNameTextField.setText("");
+        }
     }
 }  
 
