@@ -293,15 +293,15 @@ class Connect
 		Connection connection= null;
 		try
 		{
-			/*connection = DriverManager.getConnection("jdbc:mysql://my-sql-mu-system1.d.aivencloud.com:19549/defaultdb?" +
+			connection = DriverManager.getConnection("jdbc:mysql://my-sql-mu-system1.d.aivencloud.com:19549/defaultdb?" +
              "ssl=true" +
              "&sslmode=require" +
              "&sslrootcert=../lib/ca.pem",
               "avnadmin", 
-              "AVNS_MO_JeellTaHHdiu0U7v");*/
-			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/MU_DB",
+              "AVNS_MO_JeellTaHHdiu0U7v");
+			/*connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/MU_DB",
               "root", 
-              "drexastro");
+              "drexastro");*/
               
               return connection;
 		} catch(SQLException e)
