@@ -289,11 +289,6 @@ private JPanel sideLogOutPanel(String path, String text) {
     
    // adding login in panel to registerUI panel
     registrationUI.add(login);
-
-   // login.setAlignmentX(JPanel.CENTER_ALIGNMENT);
-    //login.setAlignmentY(JPanel.CENTER_ALIGNMENT);
-    //setting the borderlayout
-    //registrationUI.add(login, BorderLayout.CENTER);
     registrationUI.add(login, BorderLayout.NORTH);
     
     RoundedPanel checkout = new RoundedPanel(10);
@@ -339,6 +334,22 @@ private JPanel sideLogOutPanel(String path, String text) {
     gbg.fill = GridBagConstraints.NONE;
     gbg.anchor = GridBagConstraints.CENTER;
     RoundedButton addVehicleButton1 = new RoundedButton("Check Out", 20, new Color(73, 88, 181), new Color(59, 89, 182));
+	addVehicleButton1.addActionListener(e -> {
+		String plate = licencePlate1TextField.getText();
+		if (plate.isBlank()) {
+			JOptionPane.showMessageDialog(null, "Please enter a plate number.");
+			return;
+		}
+		boolean success = DBConnections.checkOutVehicle(plate);
+		if (success) {
+			JOptionPane.showMessageDialog(null, 
+				"Vehicle checked out successfully.");
+		} else {
+			JOptionPane.showMessageDialog(null, 
+				"No active check-in found for plate: " + plate);
+		}
+	});
+
     addVehicleButton1.setPreferredSize(new Dimension(200, 40));
     checkout.add(addVehicleButton1, gbg);
 

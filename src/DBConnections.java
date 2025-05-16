@@ -283,6 +283,26 @@ private static void handleDatabaseError(SQLException e) {
 
         return model;
     }
+		/**
+	 * Marks the currently checked-in record for the given plate_number as checked out.
+	 * Returns true if a row was updated.
+	 */
+	public static boolean checkOutVehicle(String plate) 
+	{
+		String sql = "UPDATE logs " +
+					 "SET checked = 1, action = 'vehicle checked out' " +
+					 "WHERE plate_number = ? AND (checked = 0 OR checked IS NULL)";
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, plate.trim());
+			System.out.println(plate);
+			int updated = ps.executeUpdate();
+			return updated > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 
 }
 
