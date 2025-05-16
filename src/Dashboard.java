@@ -179,7 +179,50 @@ private JPanel sideLogOutPanel(String path, String text) {
             }
         }.execute();
 
-        return panel;
+        // search button on logs
+        RoundedPanel search = new RoundedPanel(10);
+        search.setBorder(BorderFactory.createRaisedBevelBorder());
+        
+        // Use GridBagLayout for precise control
+        search.setSize(new Dimension(200,300));
+        search.setLayout(new FlowLayout());
+        
+
+        JTextField searchTextField = new JTextField(15);
+        searchTextField.setText("PLate NO");
+        search.add(searchTextField);
+        
+        RoundedButton searchButton = new RoundedButton("search", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        searchButton.setPreferredSize(new Dimension(100, 20));
+        search.add(searchButton);
+
+        panel.add(search, BorderLayout.NORTH);
+
+
+        // export database function buttons
+
+          JPanel bottom = new JPanel(new FlowLayout());
+
+          RoundedButton csv = new RoundedButton("Export As CSV ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        csv.setPreferredSize(new Dimension(200, 20));
+        bottom.add(csv);
+
+        RoundedButton pdf = new RoundedButton("Export As PDF ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        pdf.setPreferredSize(new Dimension(200, 20));
+        bottom.add(pdf);
+
+        RoundedButton logs = new RoundedButton("View Logs ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        logs.addActionListener(e -> viewLogsUI());
+        pdf.setPreferredSize(new Dimension(200, 20));
+        bottom.add(logs);
+
+        panel.add(bottom, BorderLayout.SOUTH);
+
+
+    return panel;
     }
 
 	public JPanel menuBar()
@@ -399,7 +442,7 @@ class BackgroundPanel extends JPanel {
         return panel;
   }
 
-private JPanel viewLogsUI() {
+    private JPanel viewLogsUI() {
         JPanel panel = new JPanel(new BorderLayout());
         JTable table = new JTable();
         JScrollPane scroll = new JScrollPane(table);
@@ -423,23 +466,65 @@ private JPanel viewLogsUI() {
             }
         }.execute();
 
+        // search button on logs
+        RoundedPanel search = new RoundedPanel(10);
+        search.setBorder(BorderFactory.createRaisedBevelBorder());
+        
+        // Use GridBagLayout for precise control
+        search.setSize(new Dimension(200,300));
+        search.setLayout(new FlowLayout());
+        
+
+        JTextField searchTextField = new JTextField(15);
+        searchTextField.setText("PLate NO");
+        search.add(searchTextField);
+        
+        RoundedButton searchButton = new RoundedButton("search", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        searchButton.setPreferredSize(new Dimension(100, 20));
+        search.add(searchButton);
+
+        panel.add(search, BorderLayout.NORTH);
+
+
+        // export datebase panel
+        JPanel bottom = new JPanel(new FlowLayout());
+
+
+        RoundedButton csv = new RoundedButton("Export As CSV ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        csv.setPreferredSize(new Dimension(200, 20));
+        bottom.add(csv);
+
+        RoundedButton pdf = new RoundedButton("Export As PDF ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        pdf.setPreferredSize(new Dimension(200, 20));
+        bottom.add(pdf);
+
+        
+        panel.add(bottom, BorderLayout.SOUTH);
+
+
         return panel;
     }
     
-    private JPanel bottom()
-    {
-        JPanel bottom = new JPanel(new BorderLayout());
+    // private JPanel bottom()
+    // {
+    //     JPanel bottom = new JPanel(new FlowLayout());
 
-        ExportCSV = new JButton("Export Logs to CSV");
-        ExportPDF = new JButton("Export Logs to PDF");
-        ViewLogs = new JButton("View System Logs");
+    //     ExportCSV = new JButton("Export Logs to CSV");
+    //     ExportPDF = new JButton("Export Logs to PDF");
+    //     ViewLogs = new JButton("View System Logs");
 
-        bottom.add(ExportCSV,BorderLayout.EAST);
-        bottom.add(ExportPDF, BorderLayout.CENTER);
-        bottom.add(ViewLogs, BorderLayout.WEST);
-		return bottom;
+    //     bottom.add(ExportCSV);
+    //     bottom.add(ExportPDF);
+    //     bottom.add(ViewLogs);
+		
+    //     panel.add(botton,BorderLayout.SOUTH);
 
-    }
+    //     return bottom;
+
+    // }
     public void addVehicle(String licencePlateTextField, String ownerNameTextField, Object permitTypeComboBox) {
         String permit = (String)permitTypeComboBox;
         DBConnections.addVehicle(licencePlateTextField, ownerNameTextField, permit);
