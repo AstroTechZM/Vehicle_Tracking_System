@@ -11,10 +11,11 @@ public class HomePage extends JPanel
 
 	public static JPanel home()
 	{
-		JPanel top = new JPanel(new BorderLayout());
+        BackgroundPanel top = new BackgroundPanel("../lib/gate2.jpg");
+		//JPanel top = new JPanel(new BorderLayout());
 		top.add(createSummaryPanel(), BorderLayout.NORTH);
 		//top.add(logo(), BorderLayout.EAST);
-		top.setBackground(Color.WHITE);
+		//top.setBackground(Color.WHITE);
 		return top;
 	}
 		
@@ -30,9 +31,9 @@ public class HomePage extends JPanel
         // Add 6 panels (2 rows × 3 columns)
         gridPanel.setOpaque(false);
         gridPanel.add(livePanel("Total Checkins", 75,300,150));
-        gridPanel.add(livePanel("active guards", 1,300,150));
+        gridPanel.add(livePanel("Active guards", 1,300,150));
         gridPanel.add(livePanel("Total Check-outs", 25,300,150));
-        gridPanel.add(livePanel("alerts", 25,300,150));
+        gridPanel.add(livePanel("Alerts", 25,300,150));
         mainPanel.add(gridPanel);
         return mainPanel;
     }
@@ -88,5 +89,19 @@ public class HomePage extends JPanel
         return panel;
     }
 
+}
+// BackgroundPanel class
+class BackgroundPanel extends JPanel {
+    private ImageIcon backgroundImage;
+
+    public BackgroundPanel(String imagePath) {
+        backgroundImage = new ImageIcon(imagePath);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(backgroundImage.getImage(), 0, 0, getWidth(), getHeight(), null);
+    }
 }
 
