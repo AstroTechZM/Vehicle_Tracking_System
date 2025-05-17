@@ -251,20 +251,19 @@ private static void handleDatabaseError(SQLException e) {
 
         return model;
     }
-    public static DefaultTableModel fetchVehicleHistoryModel() {
+    public static DefaultTableModel fetchVehicleHistoryModel(String sqlQuery) {
         // adjust column names to match your DB schema
         //log_id | plate_number | owner_fname | user_id | time_stamp          | ip_address    | action  
         String[] cols = {
             "plate_number",
             "owner_fname",
-            "user_id"
+            "user_id",
+            "check_in_time",
+            "check_out_time"
         };
         DefaultTableModel model = new DefaultTableModel(cols, 0);
 
-        String sql = "SELECT plate_number, owner_fname, user_id"
-                   + " FROM logs";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = connection.prepareStatement(sqlQuery);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -273,8 +272,8 @@ private static void handleDatabaseError(SQLException e) {
                 row[0] = rs.getString("plate_number");
                 row[1] = rs.getString("owner_fname");
                 row[2] = rs.getInt("user_id");
-                //row[4] = rs.getInt("permit_id");
-                //row[5] = rs.getString("permit_type");
+                row[3] = rs.getTimestamp("check_in_time");
+                row[4] = rs.getTimestamp("check_out_time");
                 model.addRow(row);
             }
         } catch (SQLException e) {
@@ -302,6 +301,22 @@ private static void handleDatabaseError(SQLException e) {
 			return false;
 		}
 	}
+	public static int getOverstayedVehicleCount() {
+    String sql = "SELECT COUNT(*) AS over_24_hours " +
+                 "FROM vehicle_history " +
+                 "WHERE check_out_time IS NULL " +
+                 "AND TIMESTAMPDIFF(HOUR, check_in_time, NOW()) >= 24";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt("over_24_hours");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
+
 
 
 }
@@ -313,15 +328,15 @@ class Connect
 		Connection connection= null;
 		try
 		{
-			connection = DriverManager.getConnection("jdbc:mysql://my-sql-mu-system1.d.aivencloud.com:19549/defaultdb?" +
+			/*connection = DriverManager.getConnection("jdbc:mysql://my-sql-mu-system1.d.aivencloud.com:19549/defaultdb?" +
              "ssl=true" +
              "&sslmode=require" +
              "&sslrootcert=../lib/ca.pem",
               "avnadmin", 
-              "AVNS_MO_JeellTaHHdiu0U7v");
-			/*connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/MU_DB",
+              "AVNS_MO_JeellTaHHdiu0U7v");*/
+			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/MU_DB",
               "root", 
-              "drexastro");*/
+              "drexastro");
               
               return connection;
 		} catch(SQLException e)

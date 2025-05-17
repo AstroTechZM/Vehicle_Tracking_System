@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.border.EmptyBorder;
@@ -159,6 +160,9 @@ private JPanel sideLogOutPanel(String path, String text) {
         JPanel panel = new JPanel(new BorderLayout());
         JTable table = new JTable();
         JScrollPane scroll = new JScrollPane(table);
+        
+        
+
         scroll.setBorder(BorderFactory.createTitledBorder("Vehicle History"));
         panel.add(scroll, BorderLayout.CENTER);
 
@@ -166,12 +170,14 @@ private JPanel sideLogOutPanel(String path, String text) {
         new SwingWorker<DefaultTableModel, Void>() {
             @Override
             protected DefaultTableModel doInBackground() throws Exception {
-                return DBConnections.fetchVehicleHistoryModel();
+                return DBConnections.fetchVehicleHistoryModel("SELECT plate_number, owner_fname, user_id,check_in_time,check_out_time" + " FROM vehicle_history");
             }
             @Override
             protected void done() {
                 try {
                     table.setModel(get());
+                    TableUtils.installCheckinCheckoutHighlighter(table);
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     JOptionPane.showMessageDialog(panel, "Error loading vehicle history: " + ex.getMessage());
@@ -193,7 +199,24 @@ private JPanel sideLogOutPanel(String path, String text) {
         search.add(searchTextField);
         
         RoundedButton searchButton = new RoundedButton("search", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        searchButton.addActionListener(e -> 
+			// Load data in background
+			new SwingWorker<DefaultTableModel, Void>() {
+				@Override
+				protected DefaultTableModel doInBackground() throws Exception {
+					return DBConnections.fetchVehicleHistoryModel("SELECT plate_number, owner_fname, user_id,check_in_time,check_out_time" + " FROM logs WHERE plate_number =" +searchTextField.getText().trim() );
+				}
+				@Override
+				protected void done() {
+					try {
+						table.setModel(get());
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						JOptionPane.showMessageDialog(panel, "Error loading vehicle history: " + ex.getMessage());
+					}
+				}
+			}.execute()
+			);
         searchButton.setPreferredSize(new Dimension(100, 20));
         search.add(searchButton);
 
@@ -507,24 +530,6 @@ class BackgroundPanel extends JPanel {
 
         return panel;
     }
-    
-    // private JPanel bottom()
-    // {
-    //     JPanel bottom = new JPanel(new FlowLayout());
-
-    //     ExportCSV = new JButton("Export Logs to CSV");
-    //     ExportPDF = new JButton("Export Logs to PDF");
-    //     ViewLogs = new JButton("View System Logs");
-
-    //     bottom.add(ExportCSV);
-    //     bottom.add(ExportPDF);
-    //     bottom.add(ViewLogs);
-		
-    //     panel.add(botton,BorderLayout.SOUTH);
-
-    //     return bottom;
-
-    // }
     public void addVehicle(String licencePlateTextField, String ownerNameTextField, Object permitTypeComboBox) {
         
         if (licencePlateTextField.isBlank()){
@@ -549,7 +554,7 @@ class BackgroundPanel extends JPanel {
 }  
 
 class Notification extends JLabel {
-    private int notificationCount = 2;
+    private int notificationCount = DBConnections.getOverstayedVehicleCount();
     private ImageIcon originalIcon;
     private static final int ICON_SIZE = 25;
 
@@ -606,4 +611,60 @@ class Notification extends JLabel {
         return new ImageIcon(image);
     }
             
+}
+class TableUtils {
+    private static final Color CHECKED_OUT_COLOR = new Color(200, 255, 200); // light green
+    private static final Color LONG_IN_COLOR     = new Color(255, 200, 200); // light red
+
+    /**
+     * Installs a row‐coloring renderer on the given table.
+     * 
+     * Rows with a non‐null "check_out_time" cell will be painted green.
+     * Rows with null "check_out_time" and in‐table "check_in_time" older
+     * than 24h will be painted red. Others stay white.
+     */
+    public static void installCheckinCheckoutHighlighter(JTable table) {
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl,
+                                                           Object value,
+                                                           boolean isSelected,
+                                                           boolean hasFocus,
+                                                           int row,
+                                                           int column) {
+                // Let the default renderer set up the component
+                Component c = super.getTableCellRendererComponent(
+                                  tbl, value, isSelected, hasFocus, row, column);
+
+                // If selected, preserve the L&F selection color
+                if (isSelected) return c;
+
+                // Look up the model and column indices
+                DefaultTableModel model = (DefaultTableModel) tbl.getModel();
+                int idxOut  = model.findColumn("check_out_time");
+                int idxIn   = model.findColumn("check_in_time");
+
+                Object outObj = idxOut >= 0 ? model.getValueAt(row, idxOut) : null;
+                Object inObj  = idxIn  >= 0 ? model.getValueAt(row, idxIn ) : null;
+
+                // Rule 1: checked out → green
+                if (outObj != null) {
+                    c.setBackground(CHECKED_OUT_COLOR);
+
+                } else if (inObj instanceof java.sql.Timestamp) {
+                    // Rule 2: still in & >24h → red
+                    java.sql.Timestamp inTs = (java.sql.Timestamp) inObj;
+                    long hours = java.time.Duration
+                        .between(inTs.toLocalDateTime(), java.time.LocalDateTime.now())
+                        .toHours();
+                    c.setBackground(hours >= 24 ? LONG_IN_COLOR : Color.WHITE);
+
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
+
+                return c;
+            }
+        });
+    }
 }
