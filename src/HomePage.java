@@ -30,7 +30,7 @@ public class HomePage extends JPanel
         
         // Add 6 panels (2 rows × 3 columns)
         gridPanel.setOpaque(false);
-        gridPanel.add(livePanel("Total Checkins", 75,300,150));
+        gridPanel.add(livePanel("Total Checkins", DBConnections.getTodayCheckInCount() ,300,150));
         gridPanel.add(livePanel("Active guards", 1,300,150));
         gridPanel.add(livePanel("Total Check-outs", 25,300,150));
         gridPanel.add(livePanel("Alerts", 25,300,150));

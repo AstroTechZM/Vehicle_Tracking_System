@@ -121,76 +121,126 @@ public class DBConnections
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
     }
-public static boolean addVehicle(String plate, String ownername, String permit) {
-    System.out.println("Starting vehicle logging...");
-    
-    // Validate required parameters first
-    if (plate == null || plate.trim().isEmpty() || ownername == null || ownername.trim().isEmpty()) {
-        System.err.println("Error: Plate number and owner name cannot be empty");
-        return false;
-    }
+	public static boolean addLog(String plate, String ownername, String action) {
+		System.out.println("Starting vehicle logging...");
+		
+		// Validate required parameters first
+		if (plate == null || plate.trim().isEmpty() || ownername == null || ownername.trim().isEmpty()) {
+			System.err.println("Error: Plate number and owner name cannot be empty");
+			return false;
+		}
 
-    try {
-        // 1. Verify the user exists
-        if (!isValidUser(user_id)) {
-            System.err.println("Error: Invalid user ID " + user_id + " - user doesn't exist");
-            return false;
-        }
+		try {
+			// 1. Verify the user exists
+			if (!isValidUser(user_id)) {
+				System.err.println("Error: Invalid user ID " + user_id + " - user doesn't exist");
+				return false;
+			}
 
-        // 2. Get current timestamp
-        LocalDateTime now = LocalDateTime.now();
-        Timestamp time = Timestamp.valueOf(now);
+			// 2. Get current timestamp
+			LocalDateTime now = LocalDateTime.now();
+			Timestamp time = Timestamp.valueOf(now);
 
-        // 3. Get IP address
-        String ipAddress = getIP();
-        if (ipAddress == null || ipAddress.trim().isEmpty()) {
-            ipAddress = "0.0.0.0"; // Default value if IP can't be obtained
-        }
+			// 3. Get IP address
+			String ipAddress = getIP();
+			if (ipAddress == null || ipAddress.trim().isEmpty()) {
+				ipAddress = "0.0.0.0"; // Default value if IP can't be obtained
+			}
 
-        // 4. Create log entry
-        String logSql = "INSERT INTO logs " +
-                       "(plate_number, owner_fname, user_id, time_stamp, ip_address, action) " +
-                       "VALUES (?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(logSql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, plate.trim());
-            pstmt.setString(2, ownername.trim());
-            pstmt.setInt(3, user_id);
-            pstmt.setTimestamp(4, time);
-            pstmt.setString(5, ipAddress);
-            pstmt.setString(6, "vehicle added");
+			// 4. Create log entry
+			String logSql = "INSERT INTO logs " +
+						   "(plate_number, owner_fname, user_id, time_stamp, ip_address, action) " +
+						   "VALUES (?, ?, ?, ?, ?, ?)";
+			
+			try (PreparedStatement pstmt = connection.prepareStatement(logSql, Statement.RETURN_GENERATED_KEYS)) {
+				pstmt.setString(1, plate.trim());
+				pstmt.setString(2, ownername.trim());
+				pstmt.setInt(3, user_id);
+				pstmt.setTimestamp(4, time);
+				pstmt.setString(5, ipAddress);
+				pstmt.setString(6, action);
 
-            int affectedRows = pstmt.executeUpdate();
-            
-            if (affectedRows > 0) {
-                try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        int logId = rs.getInt(1);
-                        System.out.println("Vehicle logged successfully with ID: " + logId);
-                        return true;
-                    }
-                }
-            }
-        }
-    } catch (SQLException e) {
-        handleDatabaseError(e);
-    }
-    return false;
-}
+				int affectedRows = pstmt.executeUpdate();
+				
+				if (affectedRows > 0) {
+					try (ResultSet rs = pstmt.getGeneratedKeys()) {
+						if (rs.next()) {
+							int logId = rs.getInt(1);
+							System.out.println("log added successfully with ID: " + logId);
+							
+							return true;
+						}
+					}
+				}
+			}
+		} catch (SQLException e) {
+			handleDatabaseError(e);
+		}
+		return false;
+	}
+	public static boolean addVehicle(String plate, String ownername, String permit) {
+		System.out.println("Starting vehicle logging...");
+		
+		// Validate required parameters first
+		if (plate == null || plate.trim().isEmpty() || ownername == null || ownername.trim().isEmpty()) {
+			System.err.println("Error: Plate number and owner name cannot be empty");
+			return false;
+		}
 
-// Helper method to validate user existence
-private static boolean isValidUser(int userId) throws SQLException {
-    String sql = "SELECT COUNT(*) FROM user WHERE user_id = ?";
-    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-        pstmt.setInt(1, userId);
-        try (ResultSet rs = pstmt.executeQuery()) {
-            return rs.next() && rs.getInt(1) > 0;
-        }
-    }
-}
+		try {
+			// 1. Verify the user exists
+			if (!isValidUser(user_id)) {
+				System.err.println("Error: Invalid user ID " + user_id + " - user doesn't exist");
+				return false;
+			}
 
-// Improved error handling
-private static void handleDatabaseError(SQLException e) {
+			// 2. Get current timestamp
+			LocalDateTime now = LocalDateTime.now();
+			Timestamp time = Timestamp.valueOf(now);
+			// 4. Create log entry
+			String logSql = "INSERT INTO vehicle_history " +
+						   "(plate_number, owner_fname, user_id, check_in_time,permit_type) " +
+						   "VALUES (?, ?, ?, ?, ?)";
+			
+			try (PreparedStatement pstmt = connection.prepareStatement(logSql, Statement.RETURN_GENERATED_KEYS)) {
+				pstmt.setString(1, plate.trim());
+				pstmt.setString(2, ownername.trim());
+				pstmt.setInt(3, user_id);
+				pstmt.setTimestamp(4, time);
+				pstmt.setString(5, permit);
+
+				int affectedRows = pstmt.executeUpdate();
+				
+				if (affectedRows > 0) {
+					try (ResultSet rs = pstmt.getGeneratedKeys()) {
+						if (rs.next()) {
+							int logId = rs.getInt(1);
+							System.out.println("Vehicle added successfully with ID: " + logId);
+							addLog(plate,ownername,"vehicle checked_in");
+							return true;
+						}
+					}
+				}
+			}
+		} catch (SQLException e) {
+			handleDatabaseError(e);
+		}
+		return false;
+	}
+
+	// Helper method to validate user existence
+	private static boolean isValidUser(int userId) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM user WHERE user_id = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+			pstmt.setInt(1, userId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				return rs.next() && rs.getInt(1) > 0;
+			}
+		}
+	}
+
+	// Improved error handling
+	private static void handleDatabaseError(SQLException e) {
     if (e.getMessage().contains("foreign key constraint fails")) {
         System.err.println("Database error: Referenced user doesn't exist");
     } else if (e.getMessage().contains("Data too long")) {
@@ -212,9 +262,6 @@ private static void handleDatabaseError(SQLException e) {
     }
     
     
-  
-
-
 
     /**
      * Fetches all rows from the 'logs' table and returns them
@@ -223,7 +270,7 @@ private static void handleDatabaseError(SQLException e) {
     public static DefaultTableModel fetchLogsTableModel() {
         String[] columnNames = {
             "LOG ID", "PLATE NUMBER", "OWNER NAME",
-            "USER ID", "TIME STAMP", "IP ADDRESS", "ACTION"
+            "ACTION BY", "TIME STAMP", "IP ADDRESS", "ACTION"
         };
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
@@ -316,6 +363,20 @@ private static void handleDatabaseError(SQLException e) {
     }
     return 0;
 }
+	public static int getTodayCheckInCount() {
+		String sql = "SELECT COUNT(*) AS today_count " +
+					 "FROM vehicle_history " +
+					 "WHERE DATE(check_in_time) = CURDATE()";
+		try (PreparedStatement ps = connection.prepareStatement(sql);
+			 ResultSet rs = ps.executeQuery()) {
+			if (rs.next()) {
+				return rs.getInt("today_count");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 
 

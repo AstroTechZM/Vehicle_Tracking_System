@@ -204,7 +204,8 @@ private JPanel sideLogOutPanel(String path, String text) {
 			new SwingWorker<DefaultTableModel, Void>() {
 				@Override
 				protected DefaultTableModel doInBackground() throws Exception {
-					return DBConnections.fetchVehicleHistoryModel("SELECT plate_number, owner_fname, user_id,check_in_time,check_out_time" + " FROM logs WHERE plate_number =" +searchTextField.getText().trim() );
+					String plate = searchTextField.getText().trim();
+					return DBConnections.fetchVehicleHistoryModel("SELECT plate_number, owner_fname, user_id,check_in_time,check_out_time" + " FROM vehicle_history WHERE plate_number = '" +plate+ "'" );
 				}
 				@Override
 				protected void done() {
