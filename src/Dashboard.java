@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.function.Supplier;
 
 public class Dashboard extends JFrame {
@@ -222,28 +223,6 @@ private JPanel sideLogOutPanel(String path, String text) {
         search.add(searchButton);
 
         panel.add(search, BorderLayout.NORTH);
-
-
-        // export database function buttons
-
-          JPanel bottom = new JPanel(new FlowLayout());
-
-          RoundedButton csv = new RoundedButton("Export As CSV ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
-        csv.setPreferredSize(new Dimension(200, 20));
-        bottom.add(csv);
-
-        RoundedButton pdf = new RoundedButton("Export As PDF ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
-        pdf.setPreferredSize(new Dimension(200, 20));
-        bottom.add(pdf);
-
-        RoundedButton logs = new RoundedButton("View Logs ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-        logs.addActionListener(e -> viewLogsUI());
-        pdf.setPreferredSize(new Dimension(200, 20));
-        bottom.add(logs);
-
-        panel.add(bottom, BorderLayout.SOUTH);
 
 
     return panel;
@@ -516,12 +495,52 @@ class BackgroundPanel extends JPanel {
 
 
         RoundedButton csv = new RoundedButton("Export As CSV ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        csv.addActionListener(e -> {
+			try {
+				LogsCsvExporter.exportLogsToCsv("../data/logs.csv");
+				JOptionPane.showMessageDialog(
+					this,
+					"Logs exported successfully to logs.csv",
+					"Export Complete",
+					JOptionPane.INFORMATION_MESSAGE
+				);
+			} catch (IOException | SQLException ex) {
+				ex.printStackTrace();
+				JOptionPane.showMessageDialog(
+					this,
+					"Error exporting logs:\n" + ex.getMessage(),
+					"Export Error",
+					JOptionPane.ERROR_MESSAGE
+				);
+			}
+		});
         csv.setPreferredSize(new Dimension(200, 20));
         bottom.add(csv);
 
         RoundedButton pdf = new RoundedButton("Export As PDF ", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
+        pdf.addActionListener(e -> {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle("Save Logs as PDF");
+		if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			File file = chooser.getSelectedFile();
+			try {
+				// Assume you have a JTable named 'table' for logs:
+				JTable tables = table;
+				TablePdfExporter.exportTableToPdf(tables, file.getAbsolutePath());
+				JOptionPane.showMessageDialog(this,
+					"PDF exported to:\n" + file.getAbsolutePath(),
+					"Export Successful",
+					JOptionPane.INFORMATION_MESSAGE);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				JOptionPane.showMessageDialog(this,
+					"Error exporting PDF:\n" + ex.getMessage(),
+					"Export Failed",
+					JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	});
+
         pdf.setPreferredSize(new Dimension(200, 20));
         bottom.add(pdf);
 
@@ -550,6 +569,47 @@ class BackgroundPanel extends JPanel {
                    "Vehicle CheckedIn Suceesfull");
            this.licencePlateTextField.setText("");
            this.ownerNameTextField.setText("");
+        }
+    }
+    public void deleteVehicle() {
+        // 1) Prompt for the check-in time
+        String input = JOptionPane.showInputDialog(
+            this,
+            "Enter the check-in timestamp to delete a vehicle record:\n" +
+            "(format: yyyy-MM-dd HH:mm:ss)",
+            "Delete Vehicle",
+            JOptionPane.QUESTION_MESSAGE
+        );
+        if (input == null || input.trim().isEmpty()) {
+            return;  // user cancelled or didn’t enter anything
+        }
+
+        try {
+            // 2) Delegate to DBConnections
+            boolean deleted = DBConnections.deleteVehicleByCheckIn(input.trim());
+            if (deleted) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Vehicle record deleted successfully.",
+                    "Deleted",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "No vehicle found with that check-in time.",
+                    "Not Found",
+                    JOptionPane.WARNING_MESSAGE
+                );
+            }
+        } catch (IllegalArgumentException ex) {
+            // Thrown if the timestamp string couldn’t be parsed
+            JOptionPane.showMessageDialog(
+                this,
+                "Invalid timestamp format. Please use yyyy-MM-dd HH:mm:ss.",
+                "Format Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 }  

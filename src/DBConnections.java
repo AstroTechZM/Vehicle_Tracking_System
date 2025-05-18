@@ -83,11 +83,15 @@ public class DBConnections
 				while (rs.next()) {
 					// Process results
 					String cpassword = rs.getString("password");
-					//String name = rs.getString("username");
+					//String name = rs.getString("fname");
 					System.out.println("ID: " + cpassword);
-					if(hashPassword(password).equals(cpassword)) return true;
-					else return false;
-					
+					if(hashPassword(password).equals(cpassword)){
+						addLog("N/A","N/A" , user_name+" logged in");
+						return true;
+					}
+					else {
+						return false;
+					}
 				}
 			} catch(SQLException e) {
 				System.err.println("Error inserting data (PreparedStatement): " + e.getMessage());
@@ -378,7 +382,56 @@ public class DBConnections
 		return 0;
 	}
 
+	/**
+     * Deletes a vehicle_history row by its exact check_in_time.
+     * If found-and-deleted, logs the deletion via addLog(...)
+     * 
+     * @param checkInTimestamp  the timestamp string in "yyyy-MM-dd HH:mm:ss" format
+     * @return true if a row was deleted; false if no matching row existed
+     * @throws IllegalArgumentException if the timestamp string is invalid
+     */
+    public static boolean deleteVehicleByCheckIn(String checkInTimestamp) {
+        // 1) Parse the timestamp (throws IllegalArgumentException on bad format)
+        java.sql.Timestamp ts = java.sql.Timestamp.valueOf(checkInTimestamp.trim());
 
+        // 2) Look up the record to get plate & owner
+        String selectSql = 
+            "SELECT plate_number, owner_fname " +
+            "FROM vehicle_history " +
+            "WHERE check_in_time = ?";
+        String deleteSql =
+            "DELETE FROM vehicle_history " +
+            "WHERE check_in_time = ?";
+
+        try (PreparedStatement selectPs = connection.prepareStatement(selectSql)) {
+            selectPs.setTimestamp(1, ts);
+
+            try (ResultSet rs = selectPs.executeQuery()) {
+                if (!rs.next()) {
+                    // no such check-in timestamp
+                    return false;
+                }
+                String plate = rs.getString("plate_number");
+                String owner = rs.getString("owner_fname");
+
+                // 3) Perform the deletion
+                try (PreparedStatement deletePs = connection.prepareStatement(deleteSql)) {
+                    deletePs.setTimestamp(1, ts);
+                    int rows = deletePs.executeUpdate();
+                    if (rows > 0) {
+                        // 4) Log the deletion in your logs table
+                        addLog(plate, owner, "vehicle deleted");
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // you might rethrow or handle differently in production
+        }
+
+        return false;
+    }
 
 }
 
