@@ -339,13 +339,14 @@ public class DBConnections
 	 */
 	public static boolean checkOutVehicle(String plate) 
 	{
-		String sql = "UPDATE logs " +
-					 "SET checked = 1, action = 'vehicle checked out' " +
-					 "WHERE plate_number = ? AND (checked = 0 OR checked IS NULL)";
+		String sql = "UPDATE vehicle_history " +
+					 "SET check_out_time = NOW()" +
+					 "WHERE plate_number = ? AND check_out_time IS NULL";
 		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 			ps.setString(1, plate.trim());
 			System.out.println(plate);
 			int updated = ps.executeUpdate();
+			addLog(plate,"N/A","checked out vehicle");
 			return updated > 0;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -381,6 +382,23 @@ public class DBConnections
 		}
 		return 0;
 	}
+	public static int getTodayCheckOutCount() {
+    String sql = "SELECT COUNT(*) AS today_checkout_count " +
+                 "FROM vehicle_history " +
+                 "WHERE DATE(check_out_time) = CURDATE()";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+            return rs.getInt("today_checkout_count");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return 0; // Default to 0 if something goes wrong
+}
+
 
 	/**
      * Deletes a vehicle_history row by its exact check_in_time.

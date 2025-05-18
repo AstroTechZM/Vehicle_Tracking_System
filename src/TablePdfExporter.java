@@ -10,6 +10,10 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.property.UnitValue;
+
+
 
 public class TablePdfExporter {
 
@@ -19,41 +23,32 @@ public class TablePdfExporter {
      * @param filePath where to write the PDF, e.g. "logs.pdf"
      * @throws IOException on file errors
      */
-    public static void exportTableToPdf(JTable table, String filePath) throws IOException {
-        // 1. Prepare PDF writer and document
-        PdfWriter writer = new PdfWriter(filePath);
-        PdfDocument pdfDoc = new PdfDocument(writer);
-        Document document = new Document(pdfDoc);
+ public static void exportTableToPdf(JTable table, String filePath) throws Exception {
+    PdfWriter writer = new PdfWriter(filePath);
+    PdfDocument pdfDoc = new PdfDocument(writer);
+    Document document = new Document(pdfDoc);
 
-        // 2. Read the table model
-        TableModel model = table.getModel();
-        int colCount = model.getColumnCount();
-        int rowCount = model.getRowCount();
+    int colCount = table.getColumnCount();
+    Table pdfTable = new Table(colCount);
+    pdfTable.setWidth(UnitValue.createPercentValue(100));
 
-        // 3. Create an itext Table with the same number of columns
-        Table pdfTable = new Table(colCount);
-        pdfTable.setWidthPercent(100);
-
-        // 4. Add header cells
-        for (int c = 0; c < colCount; c++) {
-            String header = model.getColumnName(c);
-            Cell headerCell = new Cell().add(header)
-                                        .setBold()
-                                        .setTextAlignment(TextAlignment.CENTER);
-            pdfTable.addHeaderCell(headerCell);
-        }
-
-        // 5. Add data cells
-        for (int r = 0; r < rowCount; r++) {
-            for (int c = 0; c < colCount; c++) {
-                Object value = model.getValueAt(r, c);
-                String text = value == null ? "" : value.toString();
-                pdfTable.addCell(new Cell().add(text));
-            }
-        }
-
-        // 6. Add the table to the document and close
-        document.add(pdfTable);
-        document.close();
+    // Add headers
+    for (int col = 0; col < colCount; col++) {
+        String header = table.getColumnName(col);
+        pdfTable.addHeaderCell(new Cell().add(new Paragraph(header)));
     }
+
+    // Add rows
+    for (int row = 0; row < table.getRowCount(); row++) {
+        for (int col = 0; col < colCount; col++) {
+            Object val = table.getValueAt(row, col);
+            pdfTable.addCell(new Cell().add(new Paragraph(
+                val == null ? "" : val.toString())));
+        }
+    }
+
+    document.add(pdfTable);
+    document.close();  // 🚨 must close to flush content
+}
+
 }
