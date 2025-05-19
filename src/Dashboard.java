@@ -320,11 +320,10 @@ private JPanel sideLogOutPanel(String path, String text) {
     String[] permitTypes = {"Visitor", "Staff", "Student"};
     JComboBox<String> permitTypeComboBox = new JComboBox<>(permitTypes);
     login.add(permitTypeComboBox, gbc);
-    gbc.gridx = 0;
 
     // Button
     gbc.gridy++;
-    gbc.gridwidth = 2;
+    gbc.gridwidth = 1;
     gbc.fill = GridBagConstraints.NONE;
     gbc.anchor = GridBagConstraints.CENTER;
     RoundedButton addVehicleButton = new RoundedButton("Check In", 20, new Color(73, 88, 181), new Color(59, 89, 182));
@@ -370,13 +369,13 @@ private JPanel sideLogOutPanel(String path, String text) {
     gbg.gridx = 1;
     JTextField licencePlate1TextField = new JTextField(15);
     checkout.add(licencePlate1TextField, gbg);
-    gbg.gridx = 0;
+    //gbg.gridx = 0;
 
 
 
     // Button
     gbg.gridy++;
-    gbg.gridwidth = 2;
+    //gbg.gridwidth = 2;
     gbg.fill = GridBagConstraints.NONE;
     gbg.anchor = GridBagConstraints.CENTER;
     RoundedButton addVehicleButton1 = new RoundedButton("Check Out", 20, new Color(73, 88, 181), new Color(59, 89, 182));
