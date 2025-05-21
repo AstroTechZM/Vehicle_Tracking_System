@@ -16,10 +16,12 @@ public class RoundedButton extends JButton {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				setBackground(hoverColor);
+				setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			}
 			@Override
 			public void mouseExited(MouseEvent e) {
 				setBackground(baseColor);
+				setCursor(Cursor.getDefaultCursor());
 			}
 		});
         this.radius = radius;
@@ -30,7 +32,6 @@ public class RoundedButton extends JButton {
         setForeground(Color.WHITE);
         setBackground(baseColor);
     }
-
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
