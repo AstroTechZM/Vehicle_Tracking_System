@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.function.Supplier;
+import javax.swing.Timer;
 
 public class Dashboard extends JFrame {
     // Add main content container reference
@@ -20,6 +21,8 @@ public class Dashboard extends JFrame {
     private JComboBox permitTypeComboBox;
     private JButton ExportCSV, ExportPDF , ViewLogs;
     private JPanel mainContentContainer;
+    private final Notification notification = new Notification();
+    
 
     
     public Dashboard() {
@@ -31,13 +34,20 @@ public class Dashboard extends JFrame {
         setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH); // Make window fullscreen
+		new Timer(2_000, e -> {
+			int unread = DBConnections.getUnreadLogCount();
+			notification.setNotificationCount(unread);
+		}).start();
+
+		  
+
     }
 
     private JPanel topMostPanel() {
         JPanel topMost = new JPanel(new BorderLayout());
         topMost.setBackground(Color.WHITE);
         topMost.add(menuBar(), BorderLayout.NORTH);
-        topMost.add(mainBody(), BorderLayout.CENTER); // Modified
+        topMost.add(mainBody(), BorderLayout.CENTER);
         return topMost;
     }
 
@@ -125,26 +135,31 @@ private JPanel sideLogOutPanel(String path, String text) {
 		panel.add(new JLabel(resizedHome),BorderLayout.WEST);
 		panel.add(label,BorderLayout.EAST);
 		JPanel myPanel = new JPanel();
-        
-        panel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				dispose();
-			}
-
-            
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                panel.setBackground(new Color(240, 240, 240));
-                panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    panel.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            int result = JOptionPane.showConfirmDialog(
+                panel,
+                "Are you sure you want to exit?",
+                "Confirm Exit",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
+            if (result == JOptionPane.YES_OPTION) {
+                dispose();
             }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                panel.setBackground(null);
-                panel.setCursor(Cursor.getDefaultCursor());
-            }
-        });
+        }
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            panel.setBackground(new Color(240, 240, 240));
+            panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
+        @Override
+        public void mouseExited(MouseEvent e) {
+            panel.setBackground(null);
+            panel.setCursor(Cursor.getDefaultCursor());
+        }
+    });
         return panel;
     }
 
@@ -174,16 +189,22 @@ private JPanel sideLogOutPanel(String path, String text) {
                 return DBConnections.fetchVehicleHistoryModel("SELECT plate_number, owner_fname, user_id,check_in_time,check_out_time" + " FROM vehicle_history");
             }
             @Override
-            protected void done() {
-                try {
-                    table.setModel(get());
-                    TableUtils.installCheckinCheckoutHighlighter(table);
+		protected void done() {
+			try {
+				DefaultTableModel model = get();
+				table.setModel(model);
+				TableUtils.installCheckinCheckoutHighlighter(table);
 
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(panel, "Error loading vehicle history: " + ex.getMessage());
-                }
-            }
+				//  attach right‐click delete popup
+				attachVehicleHistoryPopup(table, panel);
+
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				JOptionPane.showMessageDialog(panel,
+					"Error loading vehicle history: " + ex.getMessage());
+			}
+		}
+
         }.execute();
 
         // search button on logs
@@ -221,6 +242,44 @@ private JPanel sideLogOutPanel(String path, String text) {
 			);
         searchButton.setPreferredSize(new Dimension(100, 20));
         search.add(searchButton);
+        
+        /*JTextField deleteTextField = new JTextField(15);
+        deleteTextField.setText("check in time");
+        
+        RoundedButton deleteButton = new RoundedButton("Delete", 15, new Color(73, 88, 181), new Color(59, 89, 182));
+        deleteButton.addActionListener(e -> 
+			// Load data in background
+			new SwingWorker<DefaultTableModel, Void>() {
+				@Override
+				protected DefaultTableModel doInBackground() throws Exception {
+					String value = deleteTextField.getText().trim();
+					DBConnections.deleteVehicleByCheckIn(value);
+					return DBConnections.fetchVehicleHistoryModel("SELECT plate_number, owner_fname, user_id,check_in_time,check_out_time FROM vehicle_history" );
+				}
+				@Override
+				protected void done() {
+					try {
+						table.setModel(get());
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						JOptionPane.showMessageDialog(panel, "Error loading vehicle history: " + ex.getMessage());
+					}
+				}
+			}.execute()
+			);
+        searchButton.setPreferredSize(new Dimension(100, 20));
+        search.add(deleteButton);
+        // export datebase panel
+        JPanel bottom = new JPanel(new FlowLayout());
+        bottom.add(deleteTextField);
+
+		
+        deleteButton.setPreferredSize(new Dimension(200, 20));
+        bottom.add(deleteButton);
+
+
+        
+        panel.add(bottom, BorderLayout.SOUTH);*/
 
         panel.add(search, BorderLayout.NORTH);
 
@@ -253,7 +312,7 @@ private JPanel sideLogOutPanel(String path, String text) {
 		panel.add(Box.createHorizontalGlue());
 		panel.add(mu);
 		panel.add(Box.createHorizontalGlue());
-		panel.add(new Notification());
+		panel.add(notification);
 		panel.add(label);
 		
 		return panel;
@@ -303,7 +362,7 @@ private JPanel sideLogOutPanel(String path, String text) {
 
     // Owner's Name
     gbc.gridy++;
-    JLabel ownerNameLabel = new JLabel("Owner's Name:");
+    JLabel ownerNameLabel = new JLabel("Vehicle Type:");
     login.add(ownerNameLabel, gbc);
 
     gbc.gridx = 1;
@@ -320,11 +379,10 @@ private JPanel sideLogOutPanel(String path, String text) {
     String[] permitTypes = {"Visitor", "Staff", "Student"};
     JComboBox<String> permitTypeComboBox = new JComboBox<>(permitTypes);
     login.add(permitTypeComboBox, gbc);
-    gbc.gridx = 0;
 
     // Button
     gbc.gridy++;
-    gbc.gridwidth = 2;
+    gbc.gridwidth = 1;
     gbc.fill = GridBagConstraints.NONE;
     gbc.anchor = GridBagConstraints.CENTER;
     RoundedButton addVehicleButton = new RoundedButton("Check In", 20, new Color(73, 88, 181), new Color(59, 89, 182));
@@ -370,13 +428,13 @@ private JPanel sideLogOutPanel(String path, String text) {
     gbg.gridx = 1;
     JTextField licencePlate1TextField = new JTextField(15);
     checkout.add(licencePlate1TextField, gbg);
-    gbg.gridx = 0;
+    //gbg.gridx = 0;
 
 
 
     // Button
     gbg.gridy++;
-    gbg.gridwidth = 2;
+    //gbg.gridwidth = 2;
     gbg.fill = GridBagConstraints.NONE;
     gbg.anchor = GridBagConstraints.CENTER;
     RoundedButton addVehicleButton1 = new RoundedButton("Check Out", 20, new Color(73, 88, 181), new Color(59, 89, 182));
@@ -417,33 +475,7 @@ class BackgroundPanel extends JPanel {
         g.drawImage(backgroundImage.getImage(), 0, 0, getWidth(), getHeight(), null);
     }
 }
-    public JPanel logout() {
 
-        JPanel panel = new JPanel();
-        
-        //Creating an instance of login window
-         LoginWindow loginWindow = new LoginWindow();
-         Dashboard dashboard = new Dashboard();
-
-        // Diolog box 
-        int response = JOptionPane.showConfirmDialog(panel, "Are you sure you want to log out?", "Logout Confirmation", JOptionPane.YES_NO_OPTION);
-
-        if (response == JOptionPane.YES_OPTION) {
-            // Add logout logic here
-           //dashboard.setVisible(false); 
-           
-           JOptionPane.showMessageDialog(panel, "Loged Out Succesfull");
-
-           //loginWindow.setVisible(true);
-
-        } else {
-
-            //dashboard.setVisible(true);
-            JOptionPane.showMessageDialog(panel, "Loged Out Succesfull");   
-        }
-
-        return panel;
-  }
 
     private JPanel viewLogsUI() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -473,21 +505,7 @@ class BackgroundPanel extends JPanel {
         RoundedPanel search = new RoundedPanel(10);
         search.setBorder(BorderFactory.createRaisedBevelBorder());
         
-        // Use GridBagLayout for precise control
-        search.setSize(new Dimension(200,300));
-        search.setLayout(new FlowLayout());
-        
 
-        JTextField searchTextField = new JTextField(15);
-        searchTextField.setText("PLate NO");
-        search.add(searchTextField);
-        
-        RoundedButton searchButton = new RoundedButton("search", 15, new Color(73, 88, 181), new Color(59, 89, 182));
-        //addVehicleButton.addActionListener(e -> addVehicle(licencePlateTextField.getText(),ownerNameTextField.getText(),permitTypeComboBox.getSelectedItem()));
-        searchButton.setPreferredSize(new Dimension(100, 20));
-        search.add(searchButton);
-
-        panel.add(search, BorderLayout.NORTH);
 
 
         // export datebase panel
@@ -612,10 +630,86 @@ class BackgroundPanel extends JPanel {
             );
         }
     }
+    private void attachVehicleHistoryPopup(JTable table, JPanel parentPanel) {
+    // Create the popup menu
+    JPopupMenu popup = new JPopupMenu();
+    JMenuItem deleteItem = new JMenuItem("Delete this entry");
+    popup.add(deleteItem);
+
+    // When “Delete this entry” is clicked
+    deleteItem.addActionListener(e -> {
+        int row = table.getSelectedRow();
+        if (row < 0) return;
+
+        // Get the check_in_time value from the model
+        Object tsObj = table.getModel()
+                            .getValueAt(row, table.getColumnModel()
+                                                 .getColumnIndex("check_in_time"));
+        if (!(tsObj instanceof java.sql.Timestamp)) return;
+        String tsString = tsObj.toString(); // "YYYY-MM-DD HH:MM:SS.0"
+
+        // Confirm with user
+        int choice = JOptionPane.showConfirmDialog(
+            parentPanel,
+            "Delete vehicle checked in at " + tsString + "?",
+            "Confirm Delete",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (choice != JOptionPane.YES_OPTION) return;
+
+        // Perform deletion
+        boolean ok = DBConnections.deleteVehicleByCheckIn(
+                         tsString.substring(0, tsString.length() - 2)  // drop ".0"
+                     );
+        if (ok) {
+            JOptionPane.showMessageDialog(parentPanel,
+                "Deleted successfully.", "Deleted",
+                JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(parentPanel,
+                "Could not delete. Row may already be gone.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Reload table model
+        new SwingWorker<DefaultTableModel, Void>() {
+            protected DefaultTableModel doInBackground() throws Exception {
+                String sql = "SELECT plate_number, owner_fname, user_id, check_in_time, check_out_time "
+                           + "FROM vehicle_history";
+                return DBConnections.fetchVehicleHistoryModel(sql);
+            }
+            protected void done() {
+                try {
+                    table.setModel(get());
+                    TableUtils.installCheckinCheckoutHighlighter(table);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }.execute();
+    });
+
+    // Attach mouse listener for popup trigger
+    table.addMouseListener(new MouseAdapter() {
+        private void showIfPopup(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                int row = table.rowAtPoint(e.getPoint());
+                if (row >= 0) {
+                    table.setRowSelectionInterval(row, row);
+                    popup.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        }
+        @Override public void mousePressed(MouseEvent e)  { showIfPopup(e); }
+        @Override public void mouseReleased(MouseEvent e) { showIfPopup(e); }
+    });
+}
+
 }  
 
 class Notification extends JLabel {
-    private int notificationCount = DBConnections.getOverstayedVehicleCount();
+    private int notificationCount = DBConnections.getUnreadLogCount();
+
     private ImageIcon originalIcon;
     private static final int ICON_SIZE = 25;
 
@@ -671,7 +765,80 @@ class Notification extends JLabel {
         g2d.dispose();
         return new ImageIcon(image);
     }
-            
+    private void attachVehicleHistoryPopup(JTable table, JPanel parentPanel) {
+    // Create the popup menu
+    JPopupMenu popup = new JPopupMenu();
+    JMenuItem deleteItem = new JMenuItem("Delete this entry");
+    popup.add(deleteItem);
+
+    // When “Delete this entry” is clicked
+    deleteItem.addActionListener(e -> {
+        int row = table.getSelectedRow();
+        if (row < 0) return;
+
+        // Get the check_in_time value from the model
+        Object tsObj = table.getModel()
+                            .getValueAt(row, table.getColumnModel()
+                                                 .getColumnIndex("check_in_time"));
+        if (!(tsObj instanceof java.sql.Timestamp)) return;
+        String tsString = tsObj.toString(); // "YYYY-MM-DD HH:MM:SS.0"
+
+        // Confirm with user
+        int choice = JOptionPane.showConfirmDialog(
+            parentPanel,
+            "Delete vehicle checked in at " + tsString + "?",
+            "Confirm Delete",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (choice != JOptionPane.YES_OPTION) return;
+
+        // Perform deletion
+        boolean ok = DBConnections.deleteVehicleByCheckIn(
+                         tsString.substring(0, tsString.length() - 2)  // drop ".0"
+                     );
+        if (ok) {
+            JOptionPane.showMessageDialog(parentPanel,
+                "Deleted successfully.", "Deleted",
+                JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(parentPanel,
+                "Could not delete. Row may already be gone.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Reload table model
+        new SwingWorker<DefaultTableModel, Void>() {
+            protected DefaultTableModel doInBackground() throws Exception {
+                String sql = "SELECT plate_number, owner_fname, user_id, check_in_time, check_out_time "
+                           + "FROM vehicle_history";
+                return DBConnections.fetchVehicleHistoryModel(sql);
+            }
+            protected void done() {
+                try {
+                    table.setModel(get());
+                    TableUtils.installCheckinCheckoutHighlighter(table);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }.execute();
+    });
+
+    // Attach mouse listener for popup trigger
+    table.addMouseListener(new MouseAdapter() {
+        private void showIfPopup(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                int row = table.rowAtPoint(e.getPoint());
+                if (row >= 0) {
+                    table.setRowSelectionInterval(row, row);
+                    popup.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        }
+        @Override public void mousePressed(MouseEvent e)  { showIfPopup(e); }
+        @Override public void mouseReleased(MouseEvent e) { showIfPopup(e); }
+    });
+}
 }
 class TableUtils {
     private static final Color CHECKED_OUT_COLOR = new Color(200, 255, 200); // light green

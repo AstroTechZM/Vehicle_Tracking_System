@@ -153,8 +153,8 @@ public class DBConnections
 
 			// 4. Create log entry
 			String logSql = "INSERT INTO logs " +
-						   "(plate_number, owner_fname, user_id, time_stamp, ip_address, action) " +
-						   "VALUES (?, ?, ?, ?, ?, ?)";
+						   "(plate_number, owner_fname, user_id, time_stamp, ip_address, action,checked) " +
+						   "VALUES (?, ?, ?, ?, ?, ?,0)";
 			
 			try (PreparedStatement pstmt = connection.prepareStatement(logSql, Statement.RETURN_GENERATED_KEYS)) {
 				pstmt.setString(1, plate.trim());
@@ -307,7 +307,7 @@ public class DBConnections
         //log_id | plate_number | owner_fname | user_id | time_stamp          | ip_address    | action  
         String[] cols = {
             "plate_number",
-            "owner_fname",
+            "Vehicle Type",
             "user_id",
             "check_in_time",
             "check_out_time"
@@ -409,47 +409,58 @@ public class DBConnections
      * @throws IllegalArgumentException if the timestamp string is invalid
      */
     public static boolean deleteVehicleByCheckIn(String checkInTimestamp) {
-        // 1) Parse the timestamp (throws IllegalArgumentException on bad format)
-        java.sql.Timestamp ts = java.sql.Timestamp.valueOf(checkInTimestamp.trim());
+    // 1) Parse the timestamp
+    Timestamp ts = Timestamp.valueOf(checkInTimestamp.trim());
 
-        // 2) Look up the record to get plate & owner
-        String selectSql = 
-            "SELECT plate_number, owner_fname " +
-            "FROM vehicle_history " +
-            "WHERE check_in_time = ?";
-        String deleteSql =
-            "DELETE FROM vehicle_history " +
-            "WHERE check_in_time = ?";
+    // 2) Lookup SQL must have proper spaces and correct table name
+    String selectSql =
+        "SELECT plate_number, owner_fname " +
+        "FROM vehicle_history " +
+        "WHERE check_in_time = ?";
+    String deleteSql =
+        "DELETE FROM vehicle_history " +
+        "WHERE check_in_time = ?";
 
-        try (PreparedStatement selectPs = connection.prepareStatement(selectSql)) {
-            selectPs.setTimestamp(1, ts);
+    try (
+        PreparedStatement selectPs = connection.prepareStatement(selectSql)
+    ) {
+        selectPs.setTimestamp(1, ts);
 
-            try (ResultSet rs = selectPs.executeQuery()) {
-                if (!rs.next()) {
-                    // no such check-in timestamp
-                    return false;
-                }
-                String plate = rs.getString("plate_number");
-                String owner = rs.getString("owner_fname");
+        try (ResultSet rs = selectPs.executeQuery()) {
+            if (!rs.next()) {
+                // no such record
+                return false;
+            }
+            String plate = rs.getString("plate_number");
+            String owner = rs.getString("owner_fname");
 
-                // 3) Perform the deletion
-                try (PreparedStatement deletePs = connection.prepareStatement(deleteSql)) {
-                    deletePs.setTimestamp(1, ts);
-                    int rows = deletePs.executeUpdate();
-                    if (rows > 0) {
-                        // 4) Log the deletion in your logs table
-                        addLog(plate, owner, "vehicle deleted");
-                        return true;
-                    }
+            // 3) Now delete
+            try (PreparedStatement deletePs = connection.prepareStatement(deleteSql)) {
+                deletePs.setTimestamp(1, ts);
+                int rows = deletePs.executeUpdate();
+                if (rows > 0) {
+                    addLog(plate, owner, "vehicle deleted");
+                    return true;
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // you might rethrow or handle differently in production
         }
-
-        return false;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return false;
+}
+public static int getUnreadLogCount() {
+    String sql = "SELECT COUNT(*) FROM vehicle_history "
+               + "WHERE check_out_time = 0 OR check_out_time IS NULL";
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) return rs.getInt(1);
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
+
 
 }
 
