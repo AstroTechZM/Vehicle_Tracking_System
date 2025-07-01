@@ -1,0 +1,16 @@
+Copyright (c) 2025, Astro Technologies Zambia and/or its affiliates.
+
+This is a release of the Mulungushi Gate Management System, a System that tracks entry and exit of vehicles.
+
+License information can be found in the LICENSE file. This distribution may
+include materials developed by third parties. For license and attribution
+notices for these materials, please refer to the LICENSE file.
+
+For more information on the system, email
+matehenrie@gmail.com.
+
+
+Notice:
+- in order for the system to work it needs to be connected to a database, refer to the database schema found in the lib folder
+- you will need to supply the system with the url to the database, a username and password, this can be done by editing the DBconnections.java file.
+- furthemore you will have to create a new user account
